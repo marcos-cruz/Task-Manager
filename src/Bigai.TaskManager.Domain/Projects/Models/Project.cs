@@ -7,10 +7,12 @@ public sealed class Project
     private readonly IList<Task> _tasks = new List<Task>();
 
     public int Id { get; }
+    public int UserId { get; private set; }
     public string? Name { get; private set; }
     public Priority Priority { get; private set; }
-    public int UserId { get; }
     public IReadOnlyCollection<Task> Tasks => _tasks.ToArray();
+
+    public Project() { }
 
     private Project(int userId, string? name, Priority priority)
     {
