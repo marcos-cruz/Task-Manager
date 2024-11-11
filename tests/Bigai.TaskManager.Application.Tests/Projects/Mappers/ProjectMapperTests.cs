@@ -12,7 +12,7 @@ public class ProjectMapperTests
     public void AsDto_FromProjectToProjectDto_MapsCorrectly()
     {
         // arrange
-        var project = Project.Create(1001, "test project", Priority.High);
+        var project = Project.Create("test project");
 
         // act
         var projectDto = project.AsDto();
@@ -20,8 +20,6 @@ public class ProjectMapperTests
         // assert
         projectDto.Should().NotBeNull();
         projectDto.ProjectId.Should().Be(project.Id);
-        projectDto.UserId.Should().Be(project.UserId);
         projectDto.Name.Should().Be(project.Name);
-        projectDto.Priority.Should().Be(project.Priority);
     }
 }

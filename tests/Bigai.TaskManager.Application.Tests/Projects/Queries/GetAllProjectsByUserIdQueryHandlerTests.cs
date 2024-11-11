@@ -1,8 +1,8 @@
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Application.Projects.Queries.GetAllProjectsByUserId;
-using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
+using Bigai.TaskManager.Domain.Tests.Helpers;
 
 using FluentAssertions;
 
@@ -22,19 +22,12 @@ public class GetAllProjectsByUserIdQueryHandlerTests
     }
 
     [Fact()]
-    public async System.Threading.Tasks.Task Handle_WithUserWithProjects_ReturnsProjects()
+    public async Task Handle_WithUserWithProjects_ReturnsProjects()
     {
         // arrange
         int registeredUser = 1001;
         var query = new GetAllProjectsByUserIdQuery(registeredUser);
-        IReadOnlyCollection<Project> projects = new List<Project>
-        {
-            Project.Create(registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-            Project.Create(registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-        };
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(15, registeredUser);
 
         _projectsRepositoryMock
             .Setup(repo => repo.GetProjectsByUserIdAsync(registeredUser, It.IsAny<CancellationToken>()))
