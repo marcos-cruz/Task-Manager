@@ -22,4 +22,21 @@ internal class ProjectRepository : IProjectRepository
         return await _taskManagerDbContext.Projects.Where(p => p.WorkUnits.Any(w => w.UserId == userId))
                                                    .ToListAsync(cancellationToken);
     }
+
+    public async Task<Project?> GetProjectByIdAsync(int projectId, CancellationToken cancellationToken = default)
+    {
+        var project = await _taskManagerDbContext.Projects.Include(t => t.WorkUnits)
+                                                          .FirstOrDefaultAsync(r => r.Id == projectId);
+
+        return project;
+    }
+
+    public async Task<int> CreateAsync(Project project, CancellationToken cancellationToken = default)
+    {
+        _taskManagerDbContext.Projects.Add(project);
+
+        await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
+
+        return project.Id;
+    }
 }

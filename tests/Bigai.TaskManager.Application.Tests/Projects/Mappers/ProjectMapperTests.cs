@@ -1,5 +1,5 @@
+using Bigai.TaskManager.Application.Projects.Commands.CreateProject;
 using Bigai.TaskManager.Application.Projects.Mappers;
-using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 
 using FluentAssertions;
@@ -21,5 +21,24 @@ public class ProjectMapperTests
         projectDto.Should().NotBeNull();
         projectDto.ProjectId.Should().Be(project.Id);
         projectDto.Name.Should().Be(project.Name);
+        projectDto.WorkUnits.Should().NotBeNull();
     }
+
+    [Fact()]
+    public void AsEntity_FromCreateProjectCommandToProject_MapsCorrectly()
+    {
+        // arrange
+        var command = new CreateProjectCommand
+        {
+            Name = "test create project"
+        };
+
+        // act
+        var project = command.AsEntity();
+
+        // assert
+        project.Should().NotBeNull();
+        project.Name.Should().Be(project.Name);
+    }
+
 }
