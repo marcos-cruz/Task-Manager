@@ -1,4 +1,6 @@
-﻿using Bigai.TaskManager.Infrastructure.Persistence;
+﻿using Bigai.TaskManager.Domain.Projects.Repositories;
+using Bigai.TaskManager.Infrastructure.Persistence;
+using Bigai.TaskManager.Infrastructure.Projects.Repositories;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +20,8 @@ public static class DependencyInjection
         services.AddDbContext<TaskManagerDbContext>(options =>
                     options.UseSqlServer(connectionString)
                            .EnableSensitiveDataLogging());
+
+        services.AddScoped<IProjectRepository, ProjectRepository>();
 
         return services;
     }
