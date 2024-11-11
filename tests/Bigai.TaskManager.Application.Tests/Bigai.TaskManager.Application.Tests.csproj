@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bigai.TaskManager.Application\Bigai.TaskManager.Application.csproj" />
+    <ProjectReference Include="..\Bigai.TaskManager.Domain.Tests\Bigai.TaskManager.Domain.Tests.csproj" />
   </ItemGroup>
 
 </Project>

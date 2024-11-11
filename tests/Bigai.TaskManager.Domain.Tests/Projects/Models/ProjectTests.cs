@@ -12,19 +12,30 @@ public class ProjectTests
     {
         // arrange
         Project project;
-        int userId = 101;
         string name = "test project";
-        Priority priority = Priority.High;
 
         // act
-        project = Project.Create(userId, name, priority);
+        project = Project.Create(name);
 
         // assert
         project.Should().NotBeNull();
-        project.UserId.Should().Be(userId);
         project.Name.Should().Be(name);
-        project.Priority.Should().Be(priority);
-        project.Tasks.Should().NotBeNull();
-        project.Tasks.Should().BeEmpty();
+        project.WorkUnits.Should().NotBeNull();
+        project.WorkUnits.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void AddWorkUnit_MustIncludeWorkUnit()
+    {
+        // arrange
+        Project project = Project.Create("test project");
+        WorkUnit workUnit = WorkUnit.Create("task title", "Task description", DateTimeOffset.Now.AddDays(15), Priority.Low);
+
+        // act
+        project.AddWorkUnit(workUnit);
+
+        // assert
+        project.WorkUnits.Should().NotBeNull();
+        project.WorkUnits.First().Should().Be(workUnit);
     }
 }

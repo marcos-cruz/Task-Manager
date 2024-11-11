@@ -1,5 +1,4 @@
-using Bigai.TaskManager.Domain.Projects.Enums;
-using Bigai.TaskManager.Domain.Projects.Models;
+using Bigai.TaskManager.Domain.Tests.Helpers;
 using Bigai.TaskManager.Infrastructure.Persistence;
 using Bigai.TaskManager.Infrastructure.Projects.Repositories;
 
@@ -22,26 +21,10 @@ public class ProjectRepositoryTests
 
         var context = new TaskManagerDbContext(options);
 
+        var projects = ProjectHelper.GetProjects(15, _registeredUser);
+
         // Add test data to the in-memory database
-        context.Projects.AddRange(new List<Project>
-        {
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-        });
+        context.Projects.AddRange(projects);
 
         await context.SaveChangesAsync();
 

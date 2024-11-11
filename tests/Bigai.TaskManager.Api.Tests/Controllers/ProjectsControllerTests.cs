@@ -1,8 +1,8 @@
 using System.Net;
 
-using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
+using Bigai.TaskManager.Domain.Tests.Helpers;
 
 using FluentAssertions;
 
@@ -33,10 +33,10 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task GetByUserIdAsync_ReturnsStatus200OK()
+    public async Task GetByUserIdAsync_ReturnsStatus200OK()
     {
         // arrange
-        IReadOnlyCollection<Project> projects = GetProjects();
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(15, 1001);
 
         _projectsRepositoryMock.Setup(p => p.GetProjectsByUserIdAsync(_registeredUser, CancellationToken.None))
                                .ReturnsAsync(projects);
@@ -48,28 +48,5 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    private IReadOnlyCollection<Project> GetProjects()
-    {
-        return new List<Project>
-        {
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.High),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Low),
-            Project.Create(_registeredUser, $"Test Project {Guid.NewGuid().ToString()}", Priority.Average),
-        };
     }
 }

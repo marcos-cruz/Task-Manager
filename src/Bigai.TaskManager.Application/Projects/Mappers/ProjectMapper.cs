@@ -7,7 +7,7 @@ public static class ProjectMapper
 {
     public static ProjectDto AsDto(this Project project)
     {
-        return new ProjectDto(project.Id, project.UserId, project.Name, project.Priority);
+        return new ProjectDto(project.Id, project.Name);
     }
 
 }

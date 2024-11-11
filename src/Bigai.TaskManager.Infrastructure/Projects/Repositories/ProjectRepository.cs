@@ -19,7 +19,7 @@ internal class ProjectRepository : IProjectRepository
 
     public async Task<IReadOnlyCollection<Project>> GetProjectsByUserIdAsync(int userId, CancellationToken cancellationToken = default)
     {
-        return await _taskManagerDbContext.Projects.Where(p => p.UserId == userId)
+        return await _taskManagerDbContext.Projects.Where(p => p.WorkUnits.Any(w => w.UserId == userId))
                                                    .ToListAsync(cancellationToken);
     }
 }
