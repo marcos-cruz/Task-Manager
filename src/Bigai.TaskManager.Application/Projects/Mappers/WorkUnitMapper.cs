@@ -16,4 +16,11 @@ public static class WorkUnitMapper
                                workUnit.Status,
                                workUnit.Priority);
     }
+
+    public static IReadOnlyCollection<WorkUnitDto> AsDto(this IReadOnlyCollection<WorkUnit> workUnits)
+    {
+        var workUnitsDto = workUnits.Select(w => w.AsDto()).ToArray();
+
+        return workUnitsDto;
+    }
 }

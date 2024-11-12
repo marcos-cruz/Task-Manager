@@ -8,7 +8,7 @@ public static class ProjectMapper
 {
     public static ProjectDto AsDto(this Project project)
     {
-        var workUnits = project.WorkUnits.Select(w => w.AsDto()).ToArray();
+        var workUnits = project.WorkUnits.AsDto();
 
         return new ProjectDto(project.Id, project.Name, workUnits);
     }
