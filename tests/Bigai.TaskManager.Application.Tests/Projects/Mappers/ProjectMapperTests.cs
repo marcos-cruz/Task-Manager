@@ -38,6 +38,6 @@ public class ProjectMapperTests
 
         // assert
         project.Should().NotBeNull();
-        project.Name.Should().Be(project.Name);
+        project.Name.Should().Be(command.Name);
     }
 }

@@ -78,6 +78,23 @@ public class ProjectRepositoryTests
     }
 
     [Fact]
+    public async Task CreateAsync_WhenCreateWorkUnit_ReturnsWorkUnitId()
+    {
+        // Arrange
+        using var dbContext = await GetInMemoryDbContextAsync();
+        var repository = new ProjectRepository(dbContext);
+        Project project = ProjectHelper.GetProjects(1, _userIdRegistered).First();
+        WorkUnit workUnit = project.WorkUnits.First();
+        workUnit.AssignToProject(project.Id);
+
+        // Act
+        var workUnitId = await repository.CreateAsync(workUnit, CancellationToken.None);
+
+        // Assert
+        workUnitId.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
     public async Task GetProjectByIdAsync_WhenProjectExists_ReturnsProject()
     {
         // Arrange

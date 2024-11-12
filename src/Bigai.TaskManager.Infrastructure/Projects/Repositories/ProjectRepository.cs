@@ -38,10 +38,20 @@ internal class ProjectRepository : IProjectRepository
         return project.Id;
     }
 
+    public async Task<int> CreateAsync(WorkUnit workUnit, CancellationToken cancellationToken = default)
+    {
+        _taskManagerDbContext.WorkUnits.Add(workUnit);
+
+        await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
+
+        return workUnit.Id;
+    }
+
     public async Task RemoveProjectAsync(Project project, CancellationToken cancellationToken = default)
     {
         _taskManagerDbContext.Projects.Remove(project);
 
         await _taskManagerDbContext.SaveChangesAsync();
     }
+
 }

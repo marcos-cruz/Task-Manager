@@ -16,4 +16,11 @@ public class ProjectAuthorizationService : IProjectAuthorizationService
 
         return !authorized;
     }
+
+    public bool AuthorizeLimit(Project? project, int MaximumTaskLimit = 20)
+    {
+        bool authorized = project is not null && project.WorkUnits.Count < MaximumTaskLimit;
+
+        return authorized;
+    }
 }

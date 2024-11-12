@@ -66,4 +66,37 @@ public class ProjectAuthorizationServiceTests
         authorized.Should().Be(false);
     }
 
+
+    [Fact]
+    public void AuthorizeLimit_WhenNumberTasksWithinLimit_ReturnTrue()
+    {
+        // Arrange
+        int amountProjects = 1;
+        int userId = 1001;
+        ProjectAuthorizationService projectAuthorizationService = new();
+        Project project = ProjectHelper.GetProjects(amountProjects, userId).First();
+
+        // Act
+        var authorized = projectAuthorizationService.AuthorizeLimit(project);
+
+        // Assert
+        authorized.Should().Be(true);
+    }
+
+    [Fact]
+    public void AuthorizeLimit_WhenNumberTasksAboveLimit_ReturnFalse()
+    {
+        // Arrange
+        int amountProjects = 1;
+        int userId = 1001;
+        ProjectAuthorizationService projectAuthorizationService = new();
+        Project project = ProjectHelper.GetProjects(amountProjects, userId).First();
+
+        // Act
+        var authorized = projectAuthorizationService.AuthorizeLimit(project, 3);
+
+        // Assert
+        authorized.Should().Be(false);
+    }
+
 }

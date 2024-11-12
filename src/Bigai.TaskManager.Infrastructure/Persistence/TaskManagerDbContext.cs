@@ -7,7 +7,7 @@ namespace Bigai.TaskManager.Infrastructure.Persistence;
 internal class TaskManagerDbContext : DbContext
 {
     internal DbSet<Project> Projects { get; set; }
-    internal DbSet<Domain.Projects.Models.WorkUnit> Tasks { get; set; }
+    internal DbSet<WorkUnit> WorkUnits { get; set; }
 
     public TaskManagerDbContext(DbContextOptions<TaskManagerDbContext> options) : base(options)
     {
@@ -20,14 +20,14 @@ internal class TaskManagerDbContext : DbContext
             project.HasKey(p => p.Id);
             project.HasMany(p => p.WorkUnits)
                    .WithOne()
-                   .HasForeignKey(task => task.ProjectId);
+                   .HasForeignKey(w => w.ProjectId);
         });
 
         modelBuilder.Entity<WorkUnit>(workUnit =>
         {
-            workUnit.HasKey(p => p.Id);
-            workUnit.HasIndex(p => p.UserId);
-            workUnit.HasIndex(p => p.ProjectId);
+            workUnit.HasKey(w => w.Id);
+            workUnit.HasIndex(w => w.UserId);
+            workUnit.HasIndex(w => w.ProjectId);
         });
     }
 }
