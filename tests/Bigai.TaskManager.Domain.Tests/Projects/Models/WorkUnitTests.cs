@@ -45,6 +45,22 @@ public class WorkUnitTests
     }
 
     [Fact]
+    public void AssignToProject_MustAssingWorkUnitToProject()
+    {
+        // arrange
+        var projectId = 1001;
+        var dueDate = new DateTimeOffset().AddDays(15);
+        WorkUnit task = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
+
+        // act
+        task.AssignToProject(projectId);
+
+        // assert
+        task.Should().NotBeNull();
+        task.ProjectId.Should().Be(projectId);
+    }
+
+    [Fact]
     public void ChangeStatus_MustChangeStatus()
     {
         // arrange

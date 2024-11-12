@@ -1,3 +1,4 @@
+using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Domain.Projects.Models;
 
@@ -22,5 +23,13 @@ public static class WorkUnitMapper
         var workUnitsDto = workUnits.Select(w => w.AsDto()).ToArray();
 
         return workUnitsDto;
+    }
+
+    public static WorkUnit AsEntity(this CreateWorkUnitCommand command)
+    {
+        var workUnit = WorkUnit.Create(command.Title, command.Description, command.DueDate, command.Priority);
+        workUnit.AssignToProject(command.ProjectId);
+
+        return workUnit;
     }
 }

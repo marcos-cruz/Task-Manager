@@ -8,6 +8,8 @@ public interface IProjectRepository
 
     Task<int> CreateAsync(Project project, CancellationToken cancellationToken = default);
 
+    Task<int> CreateAsync(WorkUnit workUnit, CancellationToken cancellationToken = default);
+
     Task<Project?> GetProjectByIdAsync(int projectId, CancellationToken cancellationToken = default);
 
     Task RemoveProjectAsync(Project project, CancellationToken cancellationToken = default);

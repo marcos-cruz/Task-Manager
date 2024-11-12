@@ -31,6 +31,11 @@ public sealed class WorkUnit
         return new WorkUnit(title, description, dueDate, priority);
     }
 
+    public void AssignToProject(int projectId)
+    {
+        ProjectId = projectId;
+    }
+
     public void AssignToUser(int userId)
     {
         UserId = userId;

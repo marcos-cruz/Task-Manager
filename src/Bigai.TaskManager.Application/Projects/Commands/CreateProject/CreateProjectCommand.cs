@@ -7,6 +7,6 @@ namespace Bigai.TaskManager.Application.Projects.Commands.CreateProject;
 public class CreateProjectCommand : IRequest<int>
 {
     [Required(AllowEmptyStrings = false)]
-    [StringLength(50)]
+    [StringLength(100)]
     public string Name { get; set; } = default!;
 }
