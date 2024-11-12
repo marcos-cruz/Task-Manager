@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
 using Bigai.TaskManager.Infrastructure.Persistence;
@@ -38,5 +36,12 @@ internal class ProjectRepository : IProjectRepository
         await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
 
         return project.Id;
+    }
+
+    public async Task RemoveProjectAsync(Project project, CancellationToken cancellationToken = default)
+    {
+        _taskManagerDbContext.Projects.Remove(project);
+
+        await _taskManagerDbContext.SaveChangesAsync();
     }
 }

@@ -40,5 +40,4 @@ public class ProjectMapperTests
         project.Should().NotBeNull();
         project.Name.Should().Be(project.Name);
     }
-
 }

@@ -11,8 +11,11 @@ namespace Bigai.TaskManager.Infrastructure.Tests.Projects.Repositories;
 
 public class ProjectRepositoryTests
 {
-    private readonly int _registeredUser = 1001;
-    private readonly int _unRegisteredUser = 1001;
+    private readonly int _userIdRegistered = 1001;
+
+    private readonly int _userIdUnregistered = 1001;
+
+    private readonly int _amountProjects = 15;
 
     private async Task<TaskManagerDbContext> GetInMemoryDbContextAsync()
     {
@@ -22,9 +25,8 @@ public class ProjectRepositoryTests
 
         var context = new TaskManagerDbContext(options);
 
-        var projects = ProjectHelper.GetProjects(15, _registeredUser);
+        var projects = ProjectHelper.GetProjects(_amountProjects, _userIdRegistered);
 
-        // Add test data to the in-memory database
         context.Projects.AddRange(projects);
 
         await context.SaveChangesAsync();
@@ -33,40 +35,40 @@ public class ProjectRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenUserHasRegisteredProject_ReturnsProjects()
+    public async Task GetProjectsByUserIdAsync_WhenUserHasRegisteredProject_ReturnsProjects()
     {
         // Arrange
         using var dbContext = await GetInMemoryDbContextAsync();
         var repository = new ProjectRepository(dbContext);
 
         // Act
-        var projects = await repository.GetProjectsByUserIdAsync(_registeredUser, CancellationToken.None);
+        var projects = await repository.GetProjectsByUserIdAsync(_userIdRegistered, CancellationToken.None);
 
         // Assert
         projects.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenUserHasNoRegisteredProject_ReturnsNoOneProjects()
+    public async Task GetProjectsByUserIdAsync_WhenUserHasNoRegisteredProject_ReturnsNoOneProjects()
     {
         // Arrange
         using var dbContext = await GetInMemoryDbContextAsync();
         var repository = new ProjectRepository(dbContext);
 
         // Act
-        var projects = await repository.GetProjectsByUserIdAsync(_unRegisteredUser, CancellationToken.None);
+        var projects = await repository.GetProjectsByUserIdAsync(_userIdUnregistered, CancellationToken.None);
 
         // Assert
         projects.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenCreateProject_ReturnsProjectId()
+    public async Task CreateAsync_WhenCreateProject_ReturnsProjectId()
     {
         // Arrange
         using var dbContext = await GetInMemoryDbContextAsync();
         var repository = new ProjectRepository(dbContext);
-        Project project = ProjectHelper.GetProjects(15, _registeredUser).First();
+        Project project = ProjectHelper.GetProjects(1, _userIdRegistered).First();
 
         // Act
         var projectId = await repository.CreateAsync(project, CancellationToken.None);
@@ -75,16 +77,16 @@ public class ProjectRepositoryTests
         projectId.Should().BeGreaterThan(0);
     }
 
-
     [Fact]
     public async Task GetProjectByIdAsync_WhenProjectExists_ReturnsProject()
     {
         // Arrange
         using var dbContext = await GetInMemoryDbContextAsync();
         var repository = new ProjectRepository(dbContext);
+        var existingProjectId = 1;
 
         // Act
-        var project = await repository.GetProjectByIdAsync(1, CancellationToken.None);
+        var project = await repository.GetProjectByIdAsync(existingProjectId, CancellationToken.None);
 
         // Assert
         project.Should().NotBeNull();
@@ -96,11 +98,28 @@ public class ProjectRepositoryTests
         // Arrange
         using var dbContext = await GetInMemoryDbContextAsync();
         var repository = new ProjectRepository(dbContext);
+        var unregisteredProjectId = _amountProjects + 1;
 
         // Act
-        var project = await repository.GetProjectByIdAsync(_unRegisteredUser, CancellationToken.None);
+        var project = await repository.GetProjectByIdAsync(unregisteredProjectId, CancellationToken.None);
 
         // Assert
         project.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task RemoveProjectAsync_RemoveProjectSuccessfully()
+    {
+        // Arrange
+        using var dbContext = await GetInMemoryDbContextAsync();
+        var repository = new ProjectRepository(dbContext);
+        Project existingProject = (await repository.GetProjectsByUserIdAsync(_userIdRegistered, CancellationToken.None)).First();
+
+        // Act
+        await repository.RemoveProjectAsync(existingProject);
+        var removedProject = await repository.GetProjectByIdAsync(existingProject.Id, CancellationToken.None);
+
+        // Assert
+        removedProject.Should().BeNull();
     }
 }

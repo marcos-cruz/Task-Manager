@@ -43,4 +43,18 @@ public class WorkUnitTests
         task.Should().NotBeNull();
         task.UserId.Should().Be(userId);
     }
+
+    [Fact]
+    public void ChangeStatus_MustChangeStatus()
+    {
+        // arrange
+        var dueDate = new DateTimeOffset().AddDays(15);
+        WorkUnit task = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
+
+        // act
+        task.ChangeStatus(Status.InProgress);
+
+        // assert
+        task.Status.Should().Be(Status.InProgress);
+    }
 }

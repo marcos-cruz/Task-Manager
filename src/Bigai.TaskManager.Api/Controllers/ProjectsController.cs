@@ -1,4 +1,5 @@
 using Bigai.TaskManager.Application.Projects.Commands.CreateProject;
+using Bigai.TaskManager.Application.Projects.Commands.RemoveProject;
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Application.Projects.Queries.GetAllProjectsByUserId;
 using Bigai.TaskManager.Application.Projects.Queries.GetProjectById;
@@ -63,5 +64,27 @@ public class ProjectsController : ControllerBase
         var projectId = await _mediator.Send(command);
 
         return CreatedAtAction(nameof(GetProjectByIdAsync), new { projectId }, null);
+    }
+
+    /// <summary>
+    /// Remove a project.
+    /// </summary>
+    /// <param name="projectId">Project identifier that should be removed.</param>
+    /// <returns>Operation status.</returns>
+    [HttpDelete]
+    [Route("{projectId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveAsync([FromRoute] int projectId)
+    {
+        var removed = await _mediator.Send(new RemoveProjectByIdCommand(projectId));
+
+        return removed is null ? NotFound() : RemovedResponse(projectId, removed.Value);
+    }
+
+    private IActionResult RemovedResponse(int projectId, bool removed)
+    {
+        return removed ? NoContent() : BadRequest($"O projeto {projectId} possuí tarefas pendentes. Sugerimos a conclusão do projeto ou remoção das tarefas primeiro.");
     }
 }

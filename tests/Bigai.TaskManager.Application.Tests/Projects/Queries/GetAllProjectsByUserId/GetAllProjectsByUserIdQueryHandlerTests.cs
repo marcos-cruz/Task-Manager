@@ -8,7 +8,7 @@ using FluentAssertions;
 
 using Moq;
 
-namespace Bigai.TaskManager.Application.Tests.Projects.Queries;
+namespace Bigai.TaskManager.Application.Tests.Projects.Queries.GetAllProjectsByUserId;
 
 public class GetAllProjectsByUserIdQueryHandlerTests
 {
@@ -22,12 +22,13 @@ public class GetAllProjectsByUserIdQueryHandlerTests
     }
 
     [Fact()]
-    public async Task Handle_WithUserWithProjects_ReturnsProjects()
+    public async Task Handle_WithUserWithProjects_ReturnsUsersProjects()
     {
         // arrange
         int registeredUser = 1001;
+        int amountProjects = 15;
         var query = new GetAllProjectsByUserIdQuery(registeredUser);
-        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(15, registeredUser);
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, registeredUser);
 
         _projectsRepositoryMock
             .Setup(repo => repo.GetProjectsByUserIdAsync(registeredUser, It.IsAny<CancellationToken>()))

@@ -8,7 +8,7 @@ using FluentAssertions;
 
 using Moq;
 
-namespace Bigai.TaskManager.Application.Tests.Projects.Queries;
+namespace Bigai.TaskManager.Application.Tests.Projects.Queries.GetProjectById;
 
 public class GetProjectByIdQueryHandlerTests
 {
@@ -25,12 +25,14 @@ public class GetProjectByIdQueryHandlerTests
     public async Task Handle_WithExistingProjectId_ReturnsProject()
     {
         // arrange
-        int registeredUser = 1001;
-        var query = new GetProjectByIdQuery(registeredUser);
-        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(15, registeredUser);
+        int projectId = 1001;
+        int userId = 1010101;
+        int amountProjects = 15;
+        var query = new GetProjectByIdQuery(projectId);
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, userId);
 
         _projectsRepositoryMock
-            .Setup(repo => repo.GetProjectByIdAsync(registeredUser, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.GetProjectByIdAsync(projectId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(projects.First());
 
         // act
@@ -45,12 +47,12 @@ public class GetProjectByIdQueryHandlerTests
     public async Task Handle_WithNonExistingProjectId_ReturnsNUll()
     {
         // arrange
-        int registeredUser = 1001;
-        var query = new GetProjectByIdQuery(registeredUser);
+        int projectId = 1001;
+        var query = new GetProjectByIdQuery(projectId);
         Project? project = null;
 
         _projectsRepositoryMock
-            .Setup(repo => repo.GetProjectByIdAsync(registeredUser, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.GetProjectByIdAsync(projectId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(project);
 
         // act
@@ -59,5 +61,4 @@ public class GetProjectByIdQueryHandlerTests
         // assert
         result.Should().BeNull();
     }
-
 }
