@@ -176,4 +176,43 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    [Fact]
+    public async Task GetWorkUnitsByProjectIdAsync_ReturnsStatus200OK()
+    {
+        // arrange
+        int registeredUser = 1001;
+        int projectId = 1;
+        int amountProjects = 15;
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, registeredUser);
+
+        _projectsRepositoryMock.Setup(p => p.GetProjectByIdAsync(projectId, CancellationToken.None))
+                               .ReturnsAsync(projects.First());
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.GetAsync($"/api/projects/{projectId}/tasks/");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task GetWorkUnitsByProjectIdAsync_ReturnsStatus404NotFound()
+    {
+        // arrange
+        int projectId = 1;
+        Project? project = null;
+
+        _projectsRepositoryMock.Setup(p => p.GetProjectByIdAsync(projectId, CancellationToken.None))
+                               .ReturnsAsync(project);
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.GetAsync($"/api/projects/{projectId}/tasks/");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }

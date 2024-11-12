@@ -36,6 +36,11 @@ public class ProjectsController : ControllerBase
         return Ok(projects);
     }
 
+    /// <summary>
+    /// Gets a project by its identifier.
+    /// </summary>
+    /// <param name="projectId">Identifier of the project you want to obtain.</param>
+    /// <returns>Project matching identifier.</returns>
     [HttpGet]
     [Route("{projectId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -43,12 +48,8 @@ public class ProjectsController : ControllerBase
     public async Task<ActionResult<ProjectDto?>> GetProjectByIdAsync([FromRoute] int projectId)
     {
         var project = await _mediator.Send(new GetProjectByIdQuery(projectId));
-        if (project is null)
-        {
-            return NotFound();
-        }
 
-        return Ok(project);
+        return project is null ? NotFound() : Ok(project);
     }
 
     /// <summary>
