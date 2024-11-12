@@ -2,8 +2,10 @@ using System.Net;
 
 using Bigai.TaskManager.Api.Tests.Helpers;
 using Bigai.TaskManager.Application.Projects.Commands.CreateProject;
+using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
+using Bigai.TaskManager.Domain.Projects.Services;
 using Bigai.TaskManager.Domain.Tests.Helpers;
 
 using FluentAssertions;
@@ -19,9 +21,9 @@ namespace Bigai.TaskManager.Api.Tests.Controllers;
 
 public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly int _registeredUser = 1001;
     private readonly WebApplicationFactory<Program> _factory;
     private readonly Mock<IProjectRepository> _projectsRepositoryMock = new();
+    private readonly Mock<IProjectAuthorizationService> _projectAuthorizationServiceMock = new();
 
     public ProjectsControllerTests(WebApplicationFactory<Program> factory)
     {
@@ -30,6 +32,7 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
             builder.ConfigureTestServices(services =>
             {
                 services.Replace(ServiceDescriptor.Scoped(typeof(IProjectRepository), _ => _projectsRepositoryMock.Object));
+                services.Replace(ServiceDescriptor.Scoped(typeof(IProjectAuthorizationService), _ => _projectAuthorizationServiceMock.Object));
             });
         });
     }
@@ -38,49 +41,51 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
     public async Task GetByUserIdAsync_ReturnsStatus200OK()
     {
         // arrange
-        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(15, 1001);
+        int registeredUser = 1001;
+        int amountProjects = 15;
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, registeredUser);
 
-        _projectsRepositoryMock.Setup(p => p.GetProjectsByUserIdAsync(_registeredUser, CancellationToken.None))
-                               .ReturnsAsync(projects);
+        _projectsRepositoryMock.Setup(p => p.GetProjectsByUserIdAsync(registeredUser, CancellationToken.None))
+                                   .ReturnsAsync(projects);
 
         var client = _factory.CreateClient();
 
         // act
-        var response = await client.GetAsync($"/api/projects/users/{_registeredUser}");
+        var response = await client.GetAsync($"/api/projects/users/{registeredUser}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
-
 
     [Fact]
     public async Task GetProjectByIdAsync_ReturnsStatus200OK()
     {
         // arrange
-        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(15, 1001);
+        int registeredUser = 1001;
+        int projectId = 1;
+        int amountProjects = 15;
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, registeredUser);
 
-        _projectsRepositoryMock.Setup(p => p.GetProjectByIdAsync(_registeredUser, CancellationToken.None))
+        _projectsRepositoryMock.Setup(p => p.GetProjectByIdAsync(projectId, CancellationToken.None))
                                .ReturnsAsync(projects.First());
 
         var client = _factory.CreateClient();
 
         // act
-        var response = await client.GetAsync($"/api/projects/{_registeredUser}");
+        var response = await client.GetAsync($"/api/projects/{projectId}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-
-
-
-
     [Fact]
     public async Task CreateAsync_ReturnsStatus201Created()
     {
+        // arrange
+        int projectId = 1;
         _projectsRepositoryMock
             .Setup(repo => repo.CreateAsync(It.IsAny<Project>(), CancellationToken.None))
-            .ReturnsAsync(1);
+            .ReturnsAsync(projectId);
 
         var command = new CreateProjectCommand
         {
@@ -94,6 +99,81 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task RemoveAsync_ReturnsStatus204NoContent()
+    {
+        // arrange
+        int registeredUser = 1001;
+        int amountProjects = 15;
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, registeredUser);
+        int projectId = projects.First().Id;
+        Project project = projects.First();
+
+        _projectsRepositoryMock.Setup(p => p.GetProjectByIdAsync(projectId, CancellationToken.None))
+                               .ReturnsAsync(project);
+
+        _projectAuthorizationServiceMock.Setup(service => service.Authorize(project, ResourceOperation.Remove))
+                                        .Returns(true);
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.DeleteAsync($"/api/projects/{projectId}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task RemoveAsync_ReturnsStatus400BadRequest()
+    {
+        // arrange
+        int registeredUser = 1001;
+        int amountProjects = 15;
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, registeredUser);
+        int projectId = projects.First().Id;
+        Project project = projects.First();
+
+        _projectsRepositoryMock.Setup(p => p.GetProjectByIdAsync(projectId, CancellationToken.None))
+                               .ReturnsAsync(project);
+
+        _projectAuthorizationServiceMock.Setup(service => service.Authorize(project, ResourceOperation.Remove))
+                                        .Returns(false);
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.DeleteAsync($"/api/projects/{projectId}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task RemoveAsync_ReturnsStatus404NotFound()
+    {
+        // arrange
+        int registeredUser = 1001;
+        int amountProjects = 15;
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, registeredUser);
+        int projectId = projects.First().Id;
+        Project? project = null;
+
+        _projectsRepositoryMock.Setup(p => p.GetProjectByIdAsync(projectId, CancellationToken.None))
+                               .ReturnsAsync(project);
+
+        _projectAuthorizationServiceMock.Setup(service => service.Authorize(project, ResourceOperation.Remove))
+                                        .Returns(false);
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.DeleteAsync($"/api/projects/{projectId}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
 }

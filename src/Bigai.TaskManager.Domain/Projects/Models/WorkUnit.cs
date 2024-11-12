@@ -35,4 +35,9 @@ public sealed class WorkUnit
     {
         UserId = userId;
     }
+
+    public void ChangeStatus(Status status)
+    {
+        Status = status;
+    }
 }
