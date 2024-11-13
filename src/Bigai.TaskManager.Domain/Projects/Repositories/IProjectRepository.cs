@@ -15,4 +15,6 @@ public interface IProjectRepository
     Task<WorkUnit?> GetWorkUnitByIdAsync(int workUnitId, CancellationToken cancellationToken = default);
 
     Task RemoveProjectAsync(Project project, CancellationToken cancellationToken = default);
+
+    Task RemoveWorkUnitAsync(WorkUnit workUnit, CancellationToken cancellationToken = default);
 }

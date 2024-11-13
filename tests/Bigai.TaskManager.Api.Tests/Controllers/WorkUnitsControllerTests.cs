@@ -202,4 +202,38 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task RemoveAsync_ReturnsStatus204NoContent()
+    {
+        // arrange
+        // arrange
+        var projects = await _projectsRepositoryMock.GetProjectsByUserIdAsync(_userId);
+        var project = projects.ToArray()[0];
+        var workUnit = project.WorkUnits.ToArray()[0];
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.DeleteAsync($"/api/projects/{workUnit.ProjectId}/tasks/{workUnit.Id}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task RemoveAsync_ReturnsStatus404NotFound()
+    {
+        // arrange
+        int projectId = 7;
+        int workUnitId = 77;
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.DeleteAsync($"/api/projects/{projectId}/tasks/{workUnitId}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }

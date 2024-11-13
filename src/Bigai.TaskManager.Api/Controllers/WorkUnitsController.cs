@@ -1,4 +1,5 @@
 using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
+using Bigai.TaskManager.Application.Projects.Commands.RemoveWorkUnit;
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitById;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitsProjectById;
@@ -66,5 +67,20 @@ namespace Bigai.TaskManager.Api.Controllers
             return CreatedAtAction(nameof(GetWorkUnitByIdAsync), new { workUnitId }, null);
         }
 
+        /// <summary>
+        /// Remove a work unit.
+        /// </summary>
+        /// <param name="workUnitId">Work unit identifier that should be removed.</param>
+        /// <returns>Operation status.</returns>
+        [HttpDelete]
+        [Route("{workUnitId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RemoveAsync([FromRoute] int workUnitId)
+        {
+            var removed = await _mediator.Send(new RemoveWorkUnitByIdCommand(workUnitId));
+
+            return removed ? NoContent() : NotFound();
+        }
     }
 }
