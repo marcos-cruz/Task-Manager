@@ -141,6 +141,22 @@ public class ProjectRepositoryTests
     }
 
     [Fact]
+    public async Task RemoveWorkUnitAsync_RemoveWorkUnitSuccessfully()
+    {
+        // Arrange
+        using var dbContext = await GetInMemoryDbContextAsync();
+        var repository = new ProjectRepository(dbContext);
+        var existingWorkUnit = await repository.GetWorkUnitByIdAsync(1, CancellationToken.None);
+
+        // Act
+        await repository.RemoveWorkUnitAsync(existingWorkUnit!);
+        var removedWorkUnit = await repository.GetWorkUnitByIdAsync(existingWorkUnit!.Id, CancellationToken.None);
+
+        // Assert
+        removedWorkUnit.Should().BeNull();
+    }
+
+    [Fact]
     public async Task GetWorkUnitByIdAsync_WhenWorkUnitExists_ReturnsWorkUnit()
     {
         // Arrange
@@ -169,6 +185,4 @@ public class ProjectRepositoryTests
         // Assert
         workUnit.Should().BeNull();
     }
-
-
 }

@@ -61,4 +61,10 @@ internal class ProjectRepository : IProjectRepository
         await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task RemoveWorkUnitAsync(WorkUnit workUnit, CancellationToken cancellationToken = default)
+    {
+        _taskManagerDbContext.WorkUnits.Remove(workUnit);
+
+        await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
+    }
 }
