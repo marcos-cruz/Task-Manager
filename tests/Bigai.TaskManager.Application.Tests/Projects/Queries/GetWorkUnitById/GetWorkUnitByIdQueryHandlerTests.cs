@@ -1,5 +1,4 @@
 using Bigai.TaskManager.Application.Projects.Dtos;
-using Bigai.TaskManager.Application.Projects.Queries.GetProjectById;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitById;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;

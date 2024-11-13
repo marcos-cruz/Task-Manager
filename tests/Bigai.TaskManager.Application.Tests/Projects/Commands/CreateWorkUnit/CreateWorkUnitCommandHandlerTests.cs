@@ -2,8 +2,6 @@ using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
 using Bigai.TaskManager.Domain.Projects.Constants;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
-using Bigai.TaskManager.Domain.Projects.Repositories;
-using Bigai.TaskManager.Domain.Projects.Services;
 using Bigai.TaskManager.Infrastructure.Persistence;
 using Bigai.TaskManager.Infrastructure.Projects.Repositories;
 using Bigai.TaskManager.Infrastructure.Projects.Services;
@@ -11,8 +9,6 @@ using Bigai.TaskManager.Infrastructure.Projects.Services;
 using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
-
-using Moq;
 
 namespace Bigai.TaskManager.Application.Tests.Projects.Commands.CreateWorkUnit;
 
