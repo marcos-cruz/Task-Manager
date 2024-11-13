@@ -79,6 +79,25 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
     }
 
     [Fact]
+    public async Task GetProjectByIdAsync_ReturnsStatus404NotFound()
+    {
+        // arrange
+        int projectId = 1;
+        Project? project = null;
+
+        _projectsRepositoryMock.Setup(p => p.GetProjectByIdAsync(projectId, CancellationToken.None))
+                               .ReturnsAsync(project);
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.GetAsync($"/api/projects/{projectId}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task CreateAsync_ReturnsStatus201Created()
     {
         // arrange
@@ -99,6 +118,26 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ReturnsStatus400BadRequest()
+    {
+        // arrange
+        int projectId = 1;
+        _projectsRepositoryMock
+            .Setup(repo => repo.CreateAsync(It.IsAny<Project>(), CancellationToken.None))
+            .ReturnsAsync(projectId);
+
+        var command = new CreateProjectCommand();
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.PostAsync("/api/projects", TestHelper.GetJsonStringContent(command));
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]

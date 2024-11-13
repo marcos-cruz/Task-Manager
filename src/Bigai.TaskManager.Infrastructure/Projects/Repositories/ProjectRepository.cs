@@ -24,9 +24,16 @@ internal class ProjectRepository : IProjectRepository
     public async Task<Project?> GetProjectByIdAsync(int projectId, CancellationToken cancellationToken = default)
     {
         var project = await _taskManagerDbContext.Projects.Include(t => t.WorkUnits)
-                                                          .FirstOrDefaultAsync(r => r.Id == projectId);
+                                                          .FirstOrDefaultAsync(r => r.Id == projectId, cancellationToken);
 
         return project;
+    }
+
+    public async Task<WorkUnit?> GetWorkUnitByIdAsync(int workUnitId, CancellationToken cancellationToken = default)
+    {
+        var workUnit = await _taskManagerDbContext.WorkUnits.FirstOrDefaultAsync(r => r.Id == workUnitId, cancellationToken);
+
+        return workUnit;
     }
 
     public async Task<int> CreateAsync(Project project, CancellationToken cancellationToken = default)
@@ -51,7 +58,7 @@ internal class ProjectRepository : IProjectRepository
     {
         _taskManagerDbContext.Projects.Remove(project);
 
-        await _taskManagerDbContext.SaveChangesAsync();
+        await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
     }
 
 }

@@ -1,5 +1,6 @@
 using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
 using Bigai.TaskManager.Application.Projects.Dtos;
+using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitById;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitsProjectById;
 
 using MediatR;
@@ -35,6 +36,22 @@ namespace Bigai.TaskManager.Api.Controllers
         }
 
         /// <summary>
+        /// Gets a work unit by its identifier.
+        /// </summary>
+        /// <param name="workUnitId">Identifier of the work unit you want to obtain.</param>
+        /// <returns>Work unit matching identifier.</returns>
+        [HttpGet]
+        [Route("{workUnitId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<WorkUnitDto?>> GetWorkUnitByIdAsync([FromRoute] int workUnitId)
+        {
+            var workUnit = await _mediator.Send(new GetWorkUnitByIdQuery(workUnitId));
+
+            return workUnit is null ? NotFound() : Ok(workUnit);
+        }
+
+        /// <summary>
         /// Creates a new work unit for a project.
         /// </summary>
         /// <param name="command">Data to create the work unit.</param>
@@ -46,8 +63,7 @@ namespace Bigai.TaskManager.Api.Controllers
         {
             var workUnitId = await _mediator.Send(command);
 
-            return Created();
-            // return CreatedAtAction(nameof(GetProjectByIdAsync), new { workUnitId }, null);
+            return CreatedAtAction(nameof(GetWorkUnitByIdAsync), new { workUnitId }, null);
         }
 
     }
