@@ -25,6 +25,7 @@ public static class DependencyInjection
 
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IProjectAuthorizationService, ProjectAuthorizationService>();
+        services.AddScoped<IBussinessNotificationsHandler, BussinessNotificationsHandler>();
 
         return services;
     }

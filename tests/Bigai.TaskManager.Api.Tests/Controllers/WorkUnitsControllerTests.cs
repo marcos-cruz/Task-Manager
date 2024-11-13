@@ -76,4 +76,50 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [Fact]
+    public async Task GetUnitWorkByIdAsync_ReturnsStatus200OK()
+    {
+        // arrange
+        int registeredUser = 1001;
+        int amountProjects = 15;
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, registeredUser);
+        Project project = projects.First();
+        WorkUnit workUnit = project.WorkUnits.ToArray()[0];
+
+        _projectsRepositoryMock.Setup(p => p.GetWorkUnitByIdAsync(workUnit.Id, CancellationToken.None))
+                               .ReturnsAsync(workUnit);
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.GetAsync($"/api/projects/{project.Id}/tasks/{workUnit.Id}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task GetProjectByIdAsync_ReturnsStatus404NotFound()
+    {
+        // arrange
+        int registeredUser = 1001;
+        int amountProjects = 15;
+        int workUnitId = 77;
+        IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, registeredUser);
+        Project project = projects.First();
+        WorkUnit? workUnit = null;
+
+        _projectsRepositoryMock.Setup(p => p.GetWorkUnitByIdAsync(workUnitId, CancellationToken.None))
+                               .ReturnsAsync(workUnit);
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.GetAsync($"/api/projects/{project.Id}/tasks/{workUnitId}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
 }
