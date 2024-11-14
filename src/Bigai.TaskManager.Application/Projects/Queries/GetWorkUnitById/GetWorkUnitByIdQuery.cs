@@ -6,10 +6,12 @@ namespace Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitById;
 
 public class GetWorkUnitByIdQuery : IRequest<WorkUnitDto?>
 {
+    public int ProjectId { get; }
     public int WorkUnitId { get; }
 
-    public GetWorkUnitByIdQuery(int workUnitId)
+    public GetWorkUnitByIdQuery(int projectId, int workUnitId)
     {
+        ProjectId = projectId;
         WorkUnitId = workUnitId;
     }
 }

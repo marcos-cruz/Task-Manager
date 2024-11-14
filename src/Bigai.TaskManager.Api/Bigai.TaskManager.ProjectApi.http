@@ -1,0 +1,26 @@
+@Bigai_TaskManager_Api_HostAddress = http://localhost:5000
+@ProjectId = 1
+
+### Create a new project.
+POST {{Bigai_TaskManager_Api_HostAddress}}/api/projects/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "A sample name of project"
+}
+
+
+### Gets all registered projects of a user.
+GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/users/{{ProjectId}}
+Accept: application/json
+
+
+### Gets a project by its identifier.
+GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}
+Accept: application/json
+
+
+### Gets a project by its identifier.
+DELETE {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}
+Accept: application/json

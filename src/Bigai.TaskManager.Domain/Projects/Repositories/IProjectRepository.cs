@@ -12,7 +12,7 @@ public interface IProjectRepository
 
     Task<Project?> GetProjectByIdAsync(int projectId, CancellationToken cancellationToken = default);
 
-    Task<WorkUnit?> GetWorkUnitByIdAsync(int workUnitId, CancellationToken cancellationToken = default);
+    Task<WorkUnit?> GetWorkUnitByIdAsync(int projectId, int workUnitId, CancellationToken cancellationToken = default);
 
     Task RemoveProjectAsync(Project project, CancellationToken cancellationToken = default);
 

@@ -25,6 +25,8 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
     private readonly WebApplicationFactory<Program> _factory;
     private readonly IProjectRepository _projectsRepositoryMock;
     private readonly IProjectAuthorizationService _projectAuthorizationServiceMock;
+    private readonly ISerializeService _serializeService;
+
     private readonly int _numberOfProjects = 7;
     private readonly int _userId = 101;
     private readonly int _numberOfTasks = 7;
@@ -34,6 +36,7 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
         var dbContext = GetInMemoryDbContext(_numberOfProjects, _userId, _numberOfTasks);
         _projectsRepositoryMock = new ProjectRepository(dbContext);
         _projectAuthorizationServiceMock = new ProjectAuthorizationService();
+        _serializeService = new SerializeService();
 
         _factory = factory.WithWebHostBuilder(builder =>
         {
@@ -41,6 +44,7 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
             {
                 services.Replace(ServiceDescriptor.Scoped(typeof(IProjectRepository), _ => _projectsRepositoryMock));
                 services.Replace(ServiceDescriptor.Scoped(typeof(IProjectAuthorizationService), _ => _projectAuthorizationServiceMock));
+                services.Replace(ServiceDescriptor.Scoped(typeof(ISerializeService), _ => _serializeService));
             });
         });
     }
@@ -79,7 +83,7 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
 
                 for (int j = 0; j < numberOfTasks; j++)
                 {
-                    var dueDate = DateTimeOffset.Now.AddDays(rnd.Next(15, 45));
+                    var dueDate = DateTime.Now.AddDays(rnd.Next(15, 45));
                     var priority = (Priority)rnd.Next(0, 2);
                     var workUnit = WorkUnit.Create("Title of task", "Description of task", dueDate, priority);
 

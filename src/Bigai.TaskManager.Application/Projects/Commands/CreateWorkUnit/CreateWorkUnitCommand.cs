@@ -19,7 +19,8 @@ public class CreateWorkUnitCommand : IRequest<int>
     public string Description { get; set; } = default!;
 
     [Required()]
-    public DateTime DueDate { get; set; }
+    //[DisplayFormat(DataFormatString = "{0:dd-MM-yyyy}", ApplyFormatInEditMode = true)]
+    public DateTime DueDate { get; set; } = default!;
 
     [Required()]
     public Priority Priority { get; set; }

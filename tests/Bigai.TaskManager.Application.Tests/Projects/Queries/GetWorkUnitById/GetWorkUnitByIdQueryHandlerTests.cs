@@ -25,15 +25,15 @@ public class GetWorkUnitByIdQueryHandlerTests
     public async Task Handle_WithExistingWorkUnitId_ReturnsWorkUnit()
     {
         // arrange
-        int workUnitId = 1001;
         int userId = 1010101;
         int amountProjects = 1;
-        var query = new GetWorkUnitByIdQuery(workUnitId);
         IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, userId);
         WorkUnit workUnit = projects.First().WorkUnits.ToArray()[0];
+        int projectId = workUnit.ProjectId.HasValue ? workUnit.ProjectId.Value : 0;
+        var query = new GetWorkUnitByIdQuery(projectId, workUnit.Id);
 
         _projectsRepositoryMock
-            .Setup(repo => repo.GetWorkUnitByIdAsync(workUnitId, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.GetWorkUnitByIdAsync(projectId, workUnit.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(workUnit);
 
         // act
@@ -48,12 +48,13 @@ public class GetWorkUnitByIdQueryHandlerTests
     public async Task Handle_WithNonExistingWorkUnitId_ReturnsNUll()
     {
         // arrange
+        int projectId = 1001;
         int workUnitId = 1001;
-        var query = new GetWorkUnitByIdQuery(workUnitId);
+        var query = new GetWorkUnitByIdQuery(projectId, workUnitId);
         WorkUnit? workUnit = null;
 
         _projectsRepositoryMock
-            .Setup(repo => repo.GetWorkUnitByIdAsync(workUnitId, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.GetWorkUnitByIdAsync(projectId, workUnitId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(workUnit);
 
         // act

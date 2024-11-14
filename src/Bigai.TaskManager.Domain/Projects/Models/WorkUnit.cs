@@ -4,18 +4,22 @@ namespace Bigai.TaskManager.Domain.Projects.Models;
 
 public sealed class WorkUnit
 {
+    private readonly IList<History> _workUnits = new List<History>();
+
     public int Id { get; set; }
-    public int? ProjectId { get; private set; }
-    public int? UserId { get; private set; }
-    public string Title { get; private set; } = default!;
-    public string Description { get; private set; } = default!;
-    public DateTimeOffset DueDate { get; private set; }
-    public Status Status { get; private set; }
-    public Priority Priority { get; private set; }
+    public int? ProjectId { get; set; }
+    public int? UserId { get; set; }
+    public string Title { get; set; } = default!;
+    public string Description { get; set; } = default!;
+    public DateTime CreateDate { get; set; } = DateTime.Now;
+    public DateTime DueDate { get; set; }
+    public Status Status { get; set; }
+    public Priority Priority { get; set; }
+    public IReadOnlyCollection<History> Historys => _workUnits.ToArray();
 
     public WorkUnit() { }
 
-    private WorkUnit(string title, string description, DateTimeOffset dueDate, Priority priority)
+    private WorkUnit(string title, string description, DateTime dueDate, Priority priority)
     {
         ProjectId = null;
         UserId = null;
@@ -26,7 +30,7 @@ public sealed class WorkUnit
         Priority = priority;
     }
 
-    public static WorkUnit Create(string title, string description, DateTimeOffset dueDate, Priority priority)
+    public static WorkUnit Create(string title, string description, DateTime dueDate, Priority priority)
     {
         return new WorkUnit(title, description, dueDate, priority);
     }
@@ -44,5 +48,12 @@ public sealed class WorkUnit
     public void ChangeStatus(Status status)
     {
         Status = status;
+    }
+
+    public void RegisterChange(string changedData)
+    {
+        History history = History.Create(this, changedData);
+
+        _workUnits.Add(history);
     }
 }

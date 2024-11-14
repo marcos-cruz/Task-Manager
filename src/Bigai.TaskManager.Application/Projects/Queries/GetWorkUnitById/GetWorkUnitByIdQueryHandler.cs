@@ -17,7 +17,7 @@ public class GetWorkUnitByIdQueryHandler : IRequestHandler<GetWorkUnitByIdQuery,
 
     public async Task<WorkUnitDto?> Handle(GetWorkUnitByIdQuery request, CancellationToken cancellationToken)
     {
-        var workUnit = await _projectRepository.GetWorkUnitByIdAsync(request.WorkUnitId, cancellationToken);
+        var workUnit = await _projectRepository.GetWorkUnitByIdAsync(request.ProjectId, request.WorkUnitId, cancellationToken);
 
         var workUnitDto = workUnit is not null ? workUnit.AsDto() : null;
 

@@ -3,6 +3,7 @@ using Bigai.TaskManager.Application.Projects.Commands.RemoveWorkUnit;
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitById;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitsProjectById;
+using Bigai.TaskManager.Domain.Projects.Notifications;
 
 using MediatR;
 
@@ -40,14 +41,15 @@ namespace Bigai.TaskManager.Api.Controllers
         /// Gets a work unit by its identifier.
         /// </summary>
         /// <param name="workUnitId">Identifier of the work unit you want to obtain.</param>
+        /// <param name="projectId">Identifier of the project from which you want to obtain the work unit.</param>
         /// <returns>Work unit matching identifier.</returns>
         [HttpGet]
         [Route("{workUnitId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<WorkUnitDto?>> GetWorkUnitByIdAsync([FromRoute] int workUnitId)
+        public async Task<ActionResult<WorkUnitDto?>> GetWorkUnitByIdAsync([FromRoute] int workUnitId, int projectId)
         {
-            var workUnit = await _mediator.Send(new GetWorkUnitByIdQuery(workUnitId));
+            var workUnit = await _mediator.Send(new GetWorkUnitByIdQuery(projectId, workUnitId));
 
             return workUnit is null ? NotFound() : Ok(workUnit);
         }
@@ -56,31 +58,46 @@ namespace Bigai.TaskManager.Api.Controllers
         /// Creates a new work unit for a project.
         /// </summary>
         /// <param name="command">Data to create the work unit.</param>
+        /// <param name="projectId">Identifier of the project from which you want to create the work unit.</param>
         /// <returns>The id of the created work unit.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateWorkUnitCommand command)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CreateAsync([FromBody] CreateWorkUnitCommand command, int projectId)
         {
+            if (projectId != command.ProjectId)
+            {
+                ModelState.AddModelError(nameof(projectId), ProjectNotification.ProjectNotRegistered().Message);
+
+                return BadRequest();
+            }
+
             var workUnitId = await _mediator.Send(command);
 
-            return CreatedAtAction(nameof(GetWorkUnitByIdAsync), new { workUnitId }, null);
+            return createResponse(command, workUnitId);
         }
 
         /// <summary>
         /// Remove a work unit.
         /// </summary>
         /// <param name="workUnitId">Work unit identifier that should be removed.</param>
+        /// <param name="projectId">Identifier of the project from which you want to remove the work unit.</param>
         /// <returns>Operation status.</returns>
         [HttpDelete]
         [Route("{workUnitId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> RemoveAsync([FromRoute] int workUnitId)
+        public async Task<IActionResult> RemoveAsync([FromRoute] int workUnitId, int projectId)
         {
-            var removed = await _mediator.Send(new RemoveWorkUnitByIdCommand(workUnitId));
+            var removed = await _mediator.Send(new RemoveWorkUnitByIdCommand(projectId, workUnitId));
 
             return removed ? NoContent() : NotFound();
+        }
+
+        private IActionResult createResponse(CreateWorkUnitCommand command, int workUnitId)
+        {
+            return workUnitId * -1 == StatusCodes.Status404NotFound ? NotFound() : CreatedAtAction(nameof(GetWorkUnitByIdAsync), new { command.ProjectId, workUnitId }, null);
         }
     }
 }

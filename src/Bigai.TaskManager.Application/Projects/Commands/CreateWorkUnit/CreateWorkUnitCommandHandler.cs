@@ -15,7 +15,6 @@ namespace Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit
         private readonly IProjectAuthorizationService _projectAuthorizationService;
         private readonly IBussinessNotificationsHandler _notificationsHandler;
 
-
         public CreateWorkUnitCommandHandler(IProjectRepository projectsRepository,
                                             IProjectAuthorizationService projectAuthorizationService,
                                             IBussinessNotificationsHandler notificationsHandler)
