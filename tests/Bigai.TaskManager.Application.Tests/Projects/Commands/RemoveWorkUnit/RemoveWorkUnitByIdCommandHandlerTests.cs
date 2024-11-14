@@ -16,7 +16,7 @@ namespace Bigai.TaskManager.Application.Tests.Projects.Commands.RemoveWorkUnit;
 
 public class RemoveWorkUnitByIdCommandHandlerTests
 {
-    private async Task<TaskManagerDbContext> GetInMemoryDbContextAsync(int numberOfProjects, int userId, int numberOfTasks)
+    private static async Task<TaskManagerDbContext> GetInMemoryDbContextAsync(int numberOfProjects, int userId, int numberOfTasks)
     {
         var options = new DbContextOptionsBuilder<TaskManagerDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -35,7 +35,7 @@ public class RemoveWorkUnitByIdCommandHandlerTests
 
                 for (int j = 0; j < numberOfTasks; j++)
                 {
-                    var dueDate = DateTimeOffset.Now.AddDays(rnd.Next(15, 45));
+                    var dueDate = DateTime.Now.AddDays(rnd.Next(15, 45));
                     var priority = (Priority)rnd.Next(0, 2);
                     var workUnit = WorkUnit.Create("Title of task", "Description of task", dueDate, priority);
 
@@ -61,12 +61,13 @@ public class RemoveWorkUnitByIdCommandHandlerTests
         int numberOfProjects = 1;
         int userId = 101;
         int numberOfTasks = 7;
+        int projectId = numberOfTasks * 2;
         int workUnitId = numberOfTasks * 2;
 
         using var dbContext = await GetInMemoryDbContextAsync(numberOfProjects, userId, numberOfTasks);
         var repository = new ProjectRepository(dbContext);
 
-        var command = new RemoveWorkUnitByIdCommand(workUnitId);
+        var command = new RemoveWorkUnitByIdCommand(projectId, workUnitId);
 
         var commandHandler = new RemoveWorkUnitByIdCommandHandler(repository);
 
@@ -85,13 +86,14 @@ public class RemoveWorkUnitByIdCommandHandlerTests
         int userId = 101;
         var projectRepositoryMock = new Mock<IProjectRepository>();
         IReadOnlyCollection<Project> projects = ProjectHelper.GetProjects(amountProjects, userId);
-        WorkUnit workUnit = projects.First().WorkUnits.ToArray()[0];
+        Project project = projects.First();
+        WorkUnit workUnit = project.WorkUnits.ToArray()[0];
 
         projectRepositoryMock
-            .Setup(repo => repo.GetWorkUnitByIdAsync(workUnit.Id, CancellationToken.None))
+            .Setup(repo => repo.GetWorkUnitByIdAsync(project.Id, workUnit.Id, CancellationToken.None))
             .ReturnsAsync(workUnit);
 
-        var command = new RemoveWorkUnitByIdCommand(workUnit.Id);
+        var command = new RemoveWorkUnitByIdCommand(project.Id, workUnit.Id);
 
         var commandHandler = new RemoveWorkUnitByIdCommandHandler(projectRepositoryMock.Object);
 

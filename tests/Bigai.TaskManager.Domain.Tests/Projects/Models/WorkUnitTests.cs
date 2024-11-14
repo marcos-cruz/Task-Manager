@@ -14,7 +14,7 @@ public class WorkUnitTests
         WorkUnit task;
         var title = "task";
         var description = "description";
-        var dueDate = new DateTimeOffset().AddDays(15);
+        var dueDate = DateTime.Now.AddDays(15);
         var priority = Priority.High;
 
         // act
@@ -33,7 +33,7 @@ public class WorkUnitTests
     {
         // arrange
         var userId = 1001;
-        var dueDate = new DateTimeOffset().AddDays(15);
+        var dueDate = DateTime.Now.AddDays(15);
         WorkUnit task = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
 
         // act
@@ -49,7 +49,7 @@ public class WorkUnitTests
     {
         // arrange
         var projectId = 1001;
-        var dueDate = new DateTimeOffset().AddDays(15);
+        var dueDate = DateTime.Now.AddDays(15);
         WorkUnit task = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
 
         // act
@@ -64,7 +64,7 @@ public class WorkUnitTests
     public void ChangeStatus_MustChangeStatus()
     {
         // arrange
-        var dueDate = new DateTimeOffset().AddDays(15);
+        var dueDate = DateTime.Now.AddDays(15);
         WorkUnit task = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
 
         // act

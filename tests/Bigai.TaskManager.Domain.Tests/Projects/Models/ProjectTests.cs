@@ -29,7 +29,7 @@ public class ProjectTests
     {
         // arrange
         Project project = Project.Create("test project");
-        WorkUnit workUnit = WorkUnit.Create("task title", "Task description", DateTimeOffset.Now.AddDays(15), Priority.Low);
+        WorkUnit workUnit = WorkUnit.Create("task title", "Task description", DateTime.Now.AddDays(15), Priority.Low);
 
         // act
         project.AddWorkUnit(workUnit);

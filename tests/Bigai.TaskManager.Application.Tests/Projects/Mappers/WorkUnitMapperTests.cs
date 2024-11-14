@@ -13,7 +13,7 @@ public class WorkUnittMapperTests
     public void AsDto_FromWorkUnitToWorkUnitDto_MapsCorrectly()
     {
         // arrange
-        var workUnit = WorkUnit.Create("Work unit title", "Work unit description", new DateTimeOffset().AddDays(15), Priority.Average);
+        var workUnit = WorkUnit.Create("Work unit title", "Work unit description", DateTime.Now.AddDays(15), Priority.Average);
 
         // act
         var workUnitDto = workUnit.AsDto();

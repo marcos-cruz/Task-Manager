@@ -25,6 +25,7 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
     private readonly WebApplicationFactory<Program> _factory;
     private readonly IProjectRepository _projectsRepositoryMock;
     private readonly IProjectAuthorizationService _projectAuthorizationServiceMock;
+    private readonly ISerializeService _serializeService;
     private readonly int _numberOfProjects = 7;
     private readonly int _userId = 101;
     private readonly int _numberOfTasks = 7;
@@ -34,6 +35,7 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
         var dbContext = GetInMemoryDbContext(_numberOfProjects, _userId, _numberOfTasks);
         _projectsRepositoryMock = new ProjectRepository(dbContext);
         _projectAuthorizationServiceMock = new ProjectAuthorizationService();
+        _serializeService = new SerializeService();
 
         _factory = factory.WithWebHostBuilder(builder =>
         {
@@ -41,6 +43,7 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
             {
                 services.Replace(ServiceDescriptor.Scoped(typeof(IProjectRepository), _ => _projectsRepositoryMock));
                 services.Replace(ServiceDescriptor.Scoped(typeof(IProjectAuthorizationService), _ => _projectAuthorizationServiceMock));
+                services.Replace(ServiceDescriptor.Scoped(typeof(ISerializeService), _ => _serializeService));
             });
         });
     }
@@ -79,7 +82,7 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
 
                 for (int j = 0; j < numberOfTasks; j++)
                 {
-                    var dueDate = DateTimeOffset.Now.AddDays(rnd.Next(15, 45));
+                    var dueDate = DateTime.Now.AddDays(rnd.Next(15, 45));
                     var priority = (Priority)rnd.Next(0, 2);
                     var workUnit = WorkUnit.Create("Title of task", "Description of task", dueDate, priority);
 
@@ -152,7 +155,7 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
     {
         // arrange
         var projectId = 101001;
-        var workUnitId = 12;
+        var workUnitId = 122;
 
         var client = _factory.CreateClient();
 
@@ -169,20 +172,21 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
         // arrange
         var projects = await _projectsRepositoryMock.GetProjectsByUserIdAsync(_userId);
         var project = projects.ToArray()[2];
+        var dueDate = DateTime.Now.AddDays(15);
 
         var command = new CreateWorkUnitCommand
         {
             ProjectId = project.Id,
             Title = "Title of new work unit test",
             Description = "Description of new work unit test",
-            DueDate = DateTime.Now.AddDays(15),
+            DueDate = dueDate,
             Priority = Priority.Average
         };
 
         var client = _factory.CreateClient();
 
         // act
-        var response = await client.PostAsync("/api/projects", TestHelper.GetJsonStringContent(command));
+        var response = await client.PostAsync($"/api/projects/{project.Id}/tasks/", TestHelper.GetJsonStringContent(command));
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -192,15 +196,41 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
     public async Task CreateAsync_ReturnsStatus400BadRequest()
     {
         // arrange
+        var projectId = 1010011;
         var command = new CreateWorkUnitCommand();
 
         var client = _factory.CreateClient();
 
         // act
-        var response = await client.PostAsync("/api/projects", TestHelper.GetJsonStringContent(command));
+        var response = await client.PostAsync($"/api/projects/{projectId}/tasks", TestHelper.GetJsonStringContent(command));
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ReturnsStatus404NotFound()
+    {
+        // arrange
+        var projectId = _numberOfProjects * 2;
+        var dueDate = DateTime.Now.AddDays(15);
+
+        var command = new CreateWorkUnitCommand
+        {
+            ProjectId = projectId,
+            Title = "Title of new work unit test",
+            Description = "Description of new work unit test",
+            DueDate = dueDate,
+            Priority = Priority.Average
+        };
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.PostAsync($"/api/projects/{projectId}/tasks/", TestHelper.GetJsonStringContent(command));
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]

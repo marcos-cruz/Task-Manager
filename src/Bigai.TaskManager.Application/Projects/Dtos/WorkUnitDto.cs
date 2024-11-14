@@ -7,6 +7,6 @@ public record WorkUnitDto(int WorkUnitId,
                           int? UserId,
                           string Title,
                           string Description,
-                          DateTimeOffset DueDate,
+                          DateTime DueDate,
                           Status Status,
                           Priority Priority);

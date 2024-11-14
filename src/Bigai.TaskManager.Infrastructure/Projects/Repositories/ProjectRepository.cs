@@ -29,9 +29,9 @@ internal class ProjectRepository : IProjectRepository
         return project;
     }
 
-    public async Task<WorkUnit?> GetWorkUnitByIdAsync(int workUnitId, CancellationToken cancellationToken = default)
+    public async Task<WorkUnit?> GetWorkUnitByIdAsync(int projectId, int workUnitId, CancellationToken cancellationToken = default)
     {
-        var workUnit = await _taskManagerDbContext.WorkUnits.FirstOrDefaultAsync(r => r.Id == workUnitId, cancellationToken);
+        var workUnit = await _taskManagerDbContext.WorkUnits.FirstOrDefaultAsync(r => r.Id == workUnitId && r.ProjectId == projectId, cancellationToken);
 
         return workUnit;
     }

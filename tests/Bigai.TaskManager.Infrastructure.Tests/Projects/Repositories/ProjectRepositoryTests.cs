@@ -146,11 +146,12 @@ public class ProjectRepositoryTests
         // Arrange
         using var dbContext = await GetInMemoryDbContextAsync();
         var repository = new ProjectRepository(dbContext);
-        var existingWorkUnit = await repository.GetWorkUnitByIdAsync(1, CancellationToken.None);
+        var existingWorkUnit = await repository.GetWorkUnitByIdAsync(1, 1, CancellationToken.None);
+        int projectId = existingWorkUnit!.ProjectId!.Value;
 
         // Act
         await repository.RemoveWorkUnitAsync(existingWorkUnit!);
-        var removedWorkUnit = await repository.GetWorkUnitByIdAsync(existingWorkUnit!.Id, CancellationToken.None);
+        var removedWorkUnit = await repository.GetWorkUnitByIdAsync(projectId, existingWorkUnit!.Id, CancellationToken.None);
 
         // Assert
         removedWorkUnit.Should().BeNull();
@@ -162,10 +163,11 @@ public class ProjectRepositoryTests
         // Arrange
         using var dbContext = await GetInMemoryDbContextAsync();
         var repository = new ProjectRepository(dbContext);
+        var existingProjectId = 1;
         var existingWorkUnitId = 1;
 
         // Act
-        var workUnit = await repository.GetWorkUnitByIdAsync(existingWorkUnitId, CancellationToken.None);
+        var workUnit = await repository.GetWorkUnitByIdAsync(existingProjectId, existingWorkUnitId, CancellationToken.None);
 
         // Assert
         workUnit.Should().NotBeNull();
@@ -177,10 +179,11 @@ public class ProjectRepositoryTests
         // Arrange
         using var dbContext = await GetInMemoryDbContextAsync();
         var repository = new ProjectRepository(dbContext);
+        var unregisteredWorkProjectId = _amountProjects + 99;
         var unregisteredWorkUnitId = _amountProjects + 99;
 
         // Act
-        var workUnit = await repository.GetWorkUnitByIdAsync(unregisteredWorkUnitId, CancellationToken.None);
+        var workUnit = await repository.GetWorkUnitByIdAsync(unregisteredWorkProjectId, unregisteredWorkUnitId, CancellationToken.None);
 
         // Assert
         workUnit.Should().BeNull();

@@ -1,0 +1,30 @@
+@Bigai_TaskManager_Api_HostAddress = http://localhost:5000
+@ProjectId = 1
+@TaskId = 1
+
+### Creates a new work unit for a project.
+POST {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks
+Content-Type: application/json
+Accept: application/json
+
+{
+  "projectId": "{{ProjectId}}",
+  "title": "A sample title who describe the task",
+  "description": "A more detailed description of the task",
+  "dueDate": "2024-11-14T14:05:18.959Z",
+  "priority": "Low"
+}
+
+### Gets a list of work units associated with a project.
+GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks
+Accept: application/json
+
+
+### Gets a work unit by its identifier.
+GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks/{{TaskId}}
+Accept: application/json
+
+
+### Remove a work unit.
+DELETE {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks/{{TaskId}}
+Accept: application/json

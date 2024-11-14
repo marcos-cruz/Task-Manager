@@ -8,6 +8,7 @@ internal class TaskManagerDbContext : DbContext
 {
     internal DbSet<Project> Projects { get; set; }
     internal DbSet<WorkUnit> WorkUnits { get; set; }
+    internal DbSet<History> Histories { get; set; }
 
     public TaskManagerDbContext(DbContextOptions<TaskManagerDbContext> options) : base(options)
     {
@@ -26,8 +27,19 @@ internal class TaskManagerDbContext : DbContext
         modelBuilder.Entity<WorkUnit>(workUnit =>
         {
             workUnit.HasKey(w => w.Id);
+            workUnit.HasMany(w => w.Historys)
+                   .WithOne()
+                   .HasForeignKey(w => w.TaskId);
             workUnit.HasIndex(w => w.UserId);
             workUnit.HasIndex(w => w.ProjectId);
+        });
+
+        modelBuilder.Entity<History>(history =>
+        {
+            history.HasKey(h => h.Id);
+            history.HasIndex(h => h.UserId);
+            history.HasIndex(h => h.TaskId);
+            history.HasIndex(h => h.ProjectId);
         });
     }
 }

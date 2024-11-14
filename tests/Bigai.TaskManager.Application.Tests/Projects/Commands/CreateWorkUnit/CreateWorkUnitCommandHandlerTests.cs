@@ -14,7 +14,7 @@ namespace Bigai.TaskManager.Application.Tests.Projects.Commands.CreateWorkUnit;
 
 public class CreateWorkUnitCommandHandlerTests
 {
-    private async Task<TaskManagerDbContext> GetInMemoryDbContextAsync(int numberOfProjects, int userId, int numberOfTasks)
+    private static async Task<TaskManagerDbContext> GetInMemoryDbContextAsync(int numberOfProjects, int userId, int numberOfTasks)
     {
         var options = new DbContextOptionsBuilder<TaskManagerDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -33,7 +33,7 @@ public class CreateWorkUnitCommandHandlerTests
 
                 for (int j = 0; j < numberOfTasks; j++)
                 {
-                    var dueDate = DateTimeOffset.Now.AddDays(rnd.Next(15, 45));
+                    var dueDate = DateTime.Now.AddDays(rnd.Next(15, 45));
                     var priority = (Priority)rnd.Next(0, 2);
                     var workUnit = WorkUnit.Create("Title of task", "Description of task", dueDate, priority);
 
@@ -79,7 +79,9 @@ public class CreateWorkUnitCommandHandlerTests
             Priority = Priority.Low
         };
 
-        var commandHandler = new CreateWorkUnitCommandHandler(repository, projectAuthorizationService, notificationHandler);
+        var commandHandler = new CreateWorkUnitCommandHandler(repository,
+                                                              projectAuthorizationService,
+                                                              notificationHandler);
 
         // act
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);
@@ -111,7 +113,9 @@ public class CreateWorkUnitCommandHandlerTests
             Priority = Priority.Low
         };
 
-        var commandHandler = new CreateWorkUnitCommandHandler(repository, projectAuthorizationService, notificationHandler);
+        var commandHandler = new CreateWorkUnitCommandHandler(repository,
+                                                              projectAuthorizationService,
+                                                              notificationHandler);
 
         // act
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);
@@ -147,7 +151,9 @@ public class CreateWorkUnitCommandHandlerTests
             Priority = Priority.Low
         };
 
-        var commandHandler = new CreateWorkUnitCommandHandler(repository, projectAuthorizationService, notificationHandler);
+        var commandHandler = new CreateWorkUnitCommandHandler(repository,
+                                                              projectAuthorizationService,
+                                                              notificationHandler);
 
         // act
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);
