@@ -2,8 +2,6 @@ using Bigai.TaskManager.Domain.Projects.Repositories;
 
 using MediatR;
 
-using Microsoft.AspNetCore.Http.Timeouts;
-
 namespace Bigai.TaskManager.Application.Projects.Commands.RemoveWorkUnit;
 
 public class RemoveWorkUnitByIdCommandHandler : IRequestHandler<RemoveWorkUnitByIdCommand, bool>

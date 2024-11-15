@@ -6,12 +6,14 @@ using Bigai.TaskManager.Application.Projects.Queries.GetProjectById;
 
 using MediatR;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bigai.TaskManager.Api.Controllers;
 
 [ApiController]
 [Route("api/projects/")]
+[Authorize]
 public class ProjectsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -29,6 +31,8 @@ public class ProjectsController : ControllerBase
     [HttpGet]
     [Route("users/{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ProjectDto>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<IEnumerable<ProjectDto>>> GetByUserIdAsync([FromRoute] int userId)
     {
         var projects = await _mediator.Send(new GetAllProjectsByUserIdQuery(userId));
@@ -44,6 +48,8 @@ public class ProjectsController : ControllerBase
     [HttpGet]
     [Route("{projectId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProjectDto?>> GetProjectByIdAsync([FromRoute] int projectId)
     {
@@ -60,6 +66,8 @@ public class ProjectsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateProjectCommand command)
     {
         var projectId = await _mediator.Send(command);
@@ -76,6 +84,8 @@ public class ProjectsController : ControllerBase
     [Route("{projectId}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RemoveAsync([FromRoute] int projectId)
     {

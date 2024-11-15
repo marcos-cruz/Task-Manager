@@ -3,6 +3,7 @@ using System.Net;
 using Bigai.TaskManager.Api.Tests.Helpers;
 using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
 using Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
+using Bigai.TaskManager.Application.Users;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
@@ -13,11 +14,14 @@ using Bigai.TaskManager.Infrastructure.Projects.Services;
 
 using FluentAssertions;
 
+using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+
+using Moq;
 
 namespace Bigai.TaskManager.Api.Tests.Controllers;
 
@@ -27,6 +31,8 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
     private readonly IProjectRepository _projectsRepositoryMock;
     private readonly IProjectAuthorizationService _projectAuthorizationServiceMock;
     private readonly ISerializeService _serializeService;
+    private readonly Mock<IUserContext> _userContextMock;
+
     private readonly int _numberOfProjects = 7;
     private readonly int _userId = 101;
     private readonly int _numberOfTasks = 7;
@@ -38,13 +44,21 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
         _projectAuthorizationServiceMock = new ProjectAuthorizationService();
         _serializeService = new SerializeService();
 
+        _userContextMock = new Mock<IUserContext>();
+        var currentUser = new CurrentUser(101, []);
+        _userContextMock.Setup(u => u.GetCurrentUser()).Returns(currentUser);
+
+
         _factory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureTestServices(services =>
             {
+                services.AddSingleton<IPolicyEvaluator, FakePolicyEvaluator>();
+
                 services.Replace(ServiceDescriptor.Scoped(typeof(IProjectRepository), _ => _projectsRepositoryMock));
                 services.Replace(ServiceDescriptor.Scoped(typeof(IProjectAuthorizationService), _ => _projectAuthorizationServiceMock));
                 services.Replace(ServiceDescriptor.Scoped(typeof(ISerializeService), _ => _serializeService));
+                services.Replace(ServiceDescriptor.Scoped(typeof(IUserContext), _ => _userContextMock.Object));
             });
         });
     }
@@ -296,3 +310,6 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
+
+// TODO: Mock token para test integrado
+// https://stebet.net/mocking-jwt-tokens-in-asp-net-core-integration-tests/

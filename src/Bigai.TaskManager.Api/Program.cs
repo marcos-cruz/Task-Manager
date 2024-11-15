@@ -4,9 +4,14 @@ using System.Text.Json.Serialization;
 using Bigai.TaskManager.Application;
 using Bigai.TaskManager.Infrastructure;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthentication()
+                .AddJwtBearer();
+builder.Services.AddAuthorization();
 
 // Add services to the container.
 builder.Services.AddApplication()
@@ -24,22 +29,44 @@ builder.Services.AddControllers(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+
+builder.Services.AddSwaggerGen(swaggerOptions =>
 {
+    const string SchemeId = "BearerAuth";
     var openApiInfo = builder.Configuration.GetSection(nameof(OpenApiInfo))
                                            .Get<OpenApiInfo>();
     if (openApiInfo is not null)
     {
-        options.SwaggerDoc(openApiInfo.Version, openApiInfo);
+        swaggerOptions.SwaggerDoc(openApiInfo.Version, openApiInfo);
 
         var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         if (xmlFilename is not null)
         {
-            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            swaggerOptions.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
         }
     }
-});
 
+    swaggerOptions.AddSecurityDefinition(SchemeId, new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme
+    });
+
+    swaggerOptions.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = SchemeId
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 

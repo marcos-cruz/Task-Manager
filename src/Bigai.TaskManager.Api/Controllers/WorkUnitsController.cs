@@ -8,12 +8,14 @@ using Bigai.TaskManager.Domain.Projects.Notifications;
 
 using MediatR;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bigai.TaskManager.Api.Controllers
 {
     [ApiController]
     [Route("api/projects/{projectId}/tasks/")]
+    [Authorize]
     public class WorkUnitsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -30,6 +32,8 @@ namespace Bigai.TaskManager.Api.Controllers
         /// <returns>List of work units associated with a project.</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<WorkUnitDto>>> GetWorkUnitsByProjectIdAsync([FromRoute] int projectId)
         {
@@ -47,6 +51,8 @@ namespace Bigai.TaskManager.Api.Controllers
         [HttpGet]
         [Route("{workUnitId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<WorkUnitDto?>> GetWorkUnitByIdAsync([FromRoute] int workUnitId, int projectId)
         {
@@ -64,6 +70,8 @@ namespace Bigai.TaskManager.Api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CreateAsync([FromBody] CreateWorkUnitCommand command, int projectId)
         {
@@ -90,6 +98,8 @@ namespace Bigai.TaskManager.Api.Controllers
         [Route("{workUnitId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateAsync([FromBody] UpdateWorkUnitCommand command, [FromRoute] int workUnitId, int projectId)
         {
@@ -121,6 +131,8 @@ namespace Bigai.TaskManager.Api.Controllers
         [HttpDelete]
         [Route("{workUnitId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RemoveAsync([FromRoute] int workUnitId, int projectId)
         {

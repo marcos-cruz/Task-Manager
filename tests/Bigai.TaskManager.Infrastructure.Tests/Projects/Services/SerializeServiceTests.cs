@@ -1,7 +1,7 @@
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Tests.Helpers;
 using Bigai.TaskManager.Infrastructure.Projects.Services;
-using Newtonsoft.Json;
+
 using FluentAssertions;
 
 namespace Bigai.TaskManager.Infrastructure.Tests.Projects.Services;

@@ -1,8 +1,7 @@
 using System.Net;
 
-using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
 using Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
-using Bigai.TaskManager.Domain.Projects.Constants;
+using Bigai.TaskManager.Application.Users;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Infrastructure.Persistence;
@@ -12,6 +11,8 @@ using Bigai.TaskManager.Infrastructure.Projects.Services;
 using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
+
+using Moq;
 
 namespace Bigai.TaskManager.Application.Tests.Projects.Commands.UpdateWorkUnit;
 
@@ -70,11 +71,13 @@ public class UpdateWorkUnitCommandHandlerTests
         var project = projects[0];
         var workUnit = project.WorkUnits.ToArray()[0];
 
-        var projectAuthorizationService = new ProjectAuthorizationService();
-
         var notificationHandler = new BussinessNotificationsHandler();
 
         var serializeService = new SerializeService();
+
+        var userContextMock = new Mock<IUserContext>();
+        var currentUser = new CurrentUser(101, []);
+        userContextMock.Setup(u => u.GetCurrentUser()).Returns(currentUser);
 
         var command = new UpdateWorkUnitCommand()
         {
@@ -88,7 +91,8 @@ public class UpdateWorkUnitCommandHandlerTests
 
         var commandHandler = new UpdateWorkUnitCommandHandler(repository,
                                                               notificationHandler,
-                                                              serializeService);
+                                                              serializeService,
+                                                              userContextMock.Object);
 
         // act
         var statusCode = await commandHandler.Handle(command, CancellationToken.None);

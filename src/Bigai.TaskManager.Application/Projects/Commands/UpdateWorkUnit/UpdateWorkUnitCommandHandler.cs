@@ -2,7 +2,7 @@
 using System.Net;
 
 using Bigai.TaskManager.Application.Projects.Mappers;
-using Bigai.TaskManager.Domain.Projects.Constants;
+using Bigai.TaskManager.Application.Users;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Notifications;
 using Bigai.TaskManager.Domain.Projects.Repositories;
@@ -17,14 +17,17 @@ public class UpdateWorkUnitCommandHandler : IRequestHandler<UpdateWorkUnitComman
     private readonly IProjectRepository _projectsRepository;
     private readonly IBussinessNotificationsHandler _notificationsHandler;
     private readonly ISerializeService _serializeService;
+    private readonly IUserContext _userContext;
 
     public UpdateWorkUnitCommandHandler(IProjectRepository projectsRepository,
                                         IBussinessNotificationsHandler notificationsHandler,
-                                        ISerializeService serializeService)
+                                        ISerializeService serializeService,
+                                        IUserContext userContext)
     {
         _projectsRepository = projectsRepository;
         _notificationsHandler = notificationsHandler;
         _serializeService = serializeService;
+        _userContext = userContext;
     }
 
     public async Task<HttpStatusCode> Handle(UpdateWorkUnitCommand request, CancellationToken cancellationToken)
@@ -45,6 +48,9 @@ public class UpdateWorkUnitCommandHandler : IRequestHandler<UpdateWorkUnitComman
         if (changedValues is not null)
         {
             History history = History.Create(existingWorkUnit, changedValues, _serializeService);
+
+            var currentUser = _userContext.GetCurrentUser();
+            history.AssignToUser(currentUser!.UserId);
 
             existingWorkUnit.AddHistory(history);
 
