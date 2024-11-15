@@ -24,4 +24,9 @@ public sealed class History
             ChangedData = serializeService.WorkUnitToJson(changedValues)
         };
     }
+
+    public void AssignToUser(int userId)
+    {
+        UserId = userId;
+    }
 }

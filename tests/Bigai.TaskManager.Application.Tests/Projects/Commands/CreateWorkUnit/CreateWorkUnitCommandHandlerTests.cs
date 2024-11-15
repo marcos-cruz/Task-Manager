@@ -1,4 +1,5 @@
 using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
+using Bigai.TaskManager.Application.Users;
 using Bigai.TaskManager.Domain.Projects.Constants;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
@@ -9,6 +10,8 @@ using Bigai.TaskManager.Infrastructure.Projects.Services;
 using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
+
+using Moq;
 
 namespace Bigai.TaskManager.Application.Tests.Projects.Commands.CreateWorkUnit;
 
@@ -70,6 +73,10 @@ public class CreateWorkUnitCommandHandlerTests
 
         var notificationHandler = new BussinessNotificationsHandler();
 
+        var userContextMock = new Mock<IUserContext>();
+        var currentUser = new CurrentUser(userId, []);
+        userContextMock.Setup(u => u.GetCurrentUser()).Returns(currentUser);
+
         var command = new CreateWorkUnitCommand()
         {
             ProjectId = project.Id,
@@ -81,7 +88,8 @@ public class CreateWorkUnitCommandHandlerTests
 
         var commandHandler = new CreateWorkUnitCommandHandler(repository,
                                                               projectAuthorizationService,
-                                                              notificationHandler);
+                                                              notificationHandler,
+                                                              userContextMock.Object);
 
         // act
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);
@@ -104,6 +112,10 @@ public class CreateWorkUnitCommandHandlerTests
 
         var notificationHandler = new BussinessNotificationsHandler();
 
+        var userContextMock = new Mock<IUserContext>();
+        var currentUser = new CurrentUser(userId, []);
+        userContextMock.Setup(u => u.GetCurrentUser()).Returns(currentUser);
+
         var command = new CreateWorkUnitCommand()
         {
             ProjectId = 1010101,
@@ -115,7 +127,8 @@ public class CreateWorkUnitCommandHandlerTests
 
         var commandHandler = new CreateWorkUnitCommandHandler(repository,
                                                               projectAuthorizationService,
-                                                              notificationHandler);
+                                                              notificationHandler,
+                                                              userContextMock.Object);
 
         // act
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);
@@ -142,6 +155,10 @@ public class CreateWorkUnitCommandHandlerTests
 
         var notificationHandler = new BussinessNotificationsHandler();
 
+        var userContextMock = new Mock<IUserContext>();
+        var currentUser = new CurrentUser(101, []);
+        userContextMock.Setup(u => u.GetCurrentUser()).Returns(currentUser);
+
         var command = new CreateWorkUnitCommand()
         {
             ProjectId = project.Id,
@@ -153,7 +170,8 @@ public class CreateWorkUnitCommandHandlerTests
 
         var commandHandler = new CreateWorkUnitCommandHandler(repository,
                                                               projectAuthorizationService,
-                                                              notificationHandler);
+                                                              notificationHandler,
+                                                              userContextMock.Object);
 
         // act
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);

@@ -9,7 +9,6 @@ namespace Bigai.TaskManager.Application.Projects.Commands.CreateProject;
 public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand, int>
 {
     private readonly IProjectRepository _projectsRepository;
-
     public CreateProjectCommandHandler(IProjectRepository projectsRepository)
     {
         _projectsRepository = projectsRepository;
