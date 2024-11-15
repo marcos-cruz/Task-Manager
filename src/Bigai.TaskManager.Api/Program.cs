@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 
+using Bigai.TaskManager.Api.Middlewares;
 using Bigai.TaskManager.Application;
 using Bigai.TaskManager.Infrastructure;
 
@@ -9,57 +10,62 @@ using Microsoft.OpenApi.Models;
 
 using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddAuthentication()
-                .AddJwtBearer();
-builder.Services.AddAuthorization();
-
-// Add services to the container.
-builder.Services.AddApplication()
-                .AddInfrastructure(builder.Configuration);
-
-builder.Host.UseSerilog((context, configuration) =>
-            configuration.ReadFrom.Configuration(context.Configuration)
-        );
-
-builder.Services.AddControllers(options =>
+try
 {
-    options.SuppressAsyncSuffixInActionNames = false;
-})
-.AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-});
+    var builder = WebApplication.CreateBuilder(args);
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddAuthentication()
+                    .AddJwtBearer();
+    builder.Services.AddAuthorization();
 
-builder.Services.AddSwaggerGen(swaggerOptions =>
-{
-    const string SchemeId = "BearerAuth";
-    var openApiInfo = builder.Configuration.GetSection(nameof(OpenApiInfo))
-                                           .Get<OpenApiInfo>();
-    if (openApiInfo is not null)
+    builder.Services.AddScoped<GlobalErrorHandlerMiddleware>();
+    builder.Services.AddProblemDetails();
+
+    // Add services to the container.
+    builder.Services.AddApplication()
+                    .AddInfrastructure(builder.Configuration);
+
+    builder.Host.UseSerilog((context, configuration) =>
+                configuration.ReadFrom.Configuration(context.Configuration)
+            );
+
+    builder.Services.AddControllers(options =>
     {
-        swaggerOptions.SwaggerDoc(openApiInfo.Version, openApiInfo);
-
-        var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        if (xmlFilename is not null)
-        {
-            swaggerOptions.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-        }
-    }
-
-    swaggerOptions.AddSecurityDefinition(SchemeId, new OpenApiSecurityScheme
+        options.SuppressAsyncSuffixInActionNames = false;
+    })
+    .AddJsonOptions(options =>
     {
-        Type = SecuritySchemeType.Http,
-        Scheme = JwtBearerDefaults.AuthenticationScheme
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-    swaggerOptions.AddSecurityRequirement(new OpenApiSecurityRequirement
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+
+    builder.Services.AddSwaggerGen(swaggerOptions =>
     {
+        const string SchemeId = "BearerAuth";
+        var openApiInfo = builder.Configuration.GetSection(nameof(OpenApiInfo))
+                                               .Get<OpenApiInfo>();
+        if (openApiInfo is not null)
+        {
+            swaggerOptions.SwaggerDoc(openApiInfo.Version, openApiInfo);
+
+            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            if (xmlFilename is not null)
+            {
+                swaggerOptions.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            }
+        }
+
+        swaggerOptions.AddSecurityDefinition(SchemeId, new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = JwtBearerDefaults.AuthenticationScheme
+        });
+
+        swaggerOptions.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
         {
             new OpenApiSecurityScheme
             {
@@ -71,24 +77,37 @@ builder.Services.AddSwaggerGen(swaggerOptions =>
             },
             Array.Empty<string>()
         }
+        });
     });
-});
 
-var app = builder.Build();
+    var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseMiddleware<GlobalErrorHandlerMiddleware>();
+
+    app.UseSerilogRequestLogging();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application startup failed");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
 public partial class Program { }
