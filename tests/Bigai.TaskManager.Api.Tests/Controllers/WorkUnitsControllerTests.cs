@@ -2,6 +2,7 @@ using System.Net;
 
 using Bigai.TaskManager.Api.Tests.Helpers;
 using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
+using Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
@@ -190,6 +191,34 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ReturnsStatus204NoContent()
+    {
+        // arrange
+        var projects = await _projectsRepositoryMock.GetProjectsByUserIdAsync(_userId);
+        var project = projects.ToArray()[2];
+        var workUnit = project.WorkUnits.ToArray()[0];
+        var dueDate = DateTime.Now.AddDays(5);
+
+        var command = new UpdateWorkUnitCommand
+        {
+            ProjectId = project.Id,
+            WorkUnitId = workUnit.Id,
+            Title = "Title of new work unit test",
+            Description = "Description of new work unit test",
+            DueDate = dueDate,
+            Status = Status.InProgress
+        };
+
+        var client = _factory.CreateClient();
+
+        // act
+        var response = await client.PutAsync($"/api/projects/{project.Id}/tasks/{workUnit.Id}", TestHelper.GetJsonStringContent(command));
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]

@@ -29,7 +29,7 @@ internal class TaskManagerDbContext : DbContext
             workUnit.HasKey(w => w.Id);
             workUnit.HasMany(w => w.Historys)
                    .WithOne()
-                   .HasForeignKey(w => w.TaskId);
+                   .HasForeignKey(w => w.WorkUnitId);
             workUnit.HasIndex(w => w.UserId);
             workUnit.HasIndex(w => w.ProjectId);
         });
@@ -38,7 +38,7 @@ internal class TaskManagerDbContext : DbContext
         {
             history.HasKey(h => h.Id);
             history.HasIndex(h => h.UserId);
-            history.HasIndex(h => h.TaskId);
+            history.HasIndex(h => h.WorkUnitId);
             history.HasIndex(h => h.ProjectId);
         });
     }

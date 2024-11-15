@@ -10,11 +10,13 @@ public interface IProjectRepository
 
     Task<int> CreateAsync(WorkUnit workUnit, CancellationToken cancellationToken = default);
 
+    Task<int> UpdateAsync(WorkUnit updatedWorkUnit, CancellationToken cancellationToken = default);
+
     Task<Project?> GetProjectByIdAsync(int projectId, CancellationToken cancellationToken = default);
 
     Task<WorkUnit?> GetWorkUnitByIdAsync(int projectId, int workUnitId, CancellationToken cancellationToken = default);
 
-    Task RemoveProjectAsync(Project project, CancellationToken cancellationToken = default);
+    Task<int> RemoveProjectAsync(Project project, CancellationToken cancellationToken = default);
 
-    Task RemoveWorkUnitAsync(WorkUnit workUnit, CancellationToken cancellationToken = default);
+    Task<int> RemoveWorkUnitAsync(WorkUnit workUnit, CancellationToken cancellationToken = default);
 }

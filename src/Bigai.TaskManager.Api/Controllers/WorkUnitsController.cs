@@ -1,5 +1,6 @@
 using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
 using Bigai.TaskManager.Application.Projects.Commands.RemoveWorkUnit;
+using Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitById;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitsProjectById;
@@ -75,8 +76,35 @@ namespace Bigai.TaskManager.Api.Controllers
 
             var workUnitId = await _mediator.Send(command);
 
-            return createResponse(command, workUnitId);
+            return CreateResponse(command, workUnitId);
         }
+
+        [HttpPut]
+        [Route("{workUnitId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateAsync([FromBody] UpdateWorkUnitCommand command, [FromRoute] int workUnitId, int projectId)
+        {
+            if (projectId != command.ProjectId)
+            {
+                ModelState.AddModelError(nameof(projectId), ProjectNotification.ProjectNotRegistered().Message);
+
+                return BadRequest();
+            }
+
+            if (workUnitId != command.WorkUnitId)
+            {
+                ModelState.AddModelError(nameof(workUnitId), WorkUnitNotification.WorkUnitNotRegistered().Message);
+
+                return BadRequest();
+            }
+
+            var statusCode = await _mediator.Send(command);
+
+            return NoContent();
+        }
+
 
         /// <summary>
         /// Remove a work unit.
@@ -95,7 +123,7 @@ namespace Bigai.TaskManager.Api.Controllers
             return removed ? NoContent() : NotFound();
         }
 
-        private IActionResult createResponse(CreateWorkUnitCommand command, int workUnitId)
+        private IActionResult CreateResponse(CreateWorkUnitCommand command, int workUnitId)
         {
             return workUnitId * -1 == StatusCodes.Status404NotFound ? NotFound() : CreatedAtAction(nameof(GetWorkUnitByIdAsync), new { command.ProjectId, workUnitId }, null);
         }

@@ -1,4 +1,5 @@
 using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
+using Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Domain.Projects.Models;
 
@@ -13,8 +14,8 @@ public static class WorkUnitMapper
                                workUnit.UserId,
                                workUnit.Title,
                                workUnit.Description,
-                               workUnit.DueDate,
-                               workUnit.Status,
+                               workUnit.DueDate!.Value,
+                               workUnit.Status!.Value,
                                workUnit.Priority);
     }
 
@@ -32,4 +33,16 @@ public static class WorkUnitMapper
 
         return workUnit;
     }
+
+    public static WorkUnit AsEntity(this UpdateWorkUnitCommand command, WorkUnit existingWorkUnit)
+    {
+        return new WorkUnit()
+        {
+            Title = command.Title ?? existingWorkUnit.Title,
+            Description = command.Description ?? existingWorkUnit.Description,
+            DueDate = command.DueDate ?? existingWorkUnit.DueDate,
+            Status = command.Status ?? existingWorkUnit.Status
+        };
+    }
+
 }

@@ -5,6 +5,7 @@
         "yzhang.markdown-all-in-one",
         "ms-dotnettools.csdevkit",
         "sonarsource.sonarlint-vscode",
-        "pkief.material-icon-theme"
+        "pkief.material-icon-theme",
+        "kreativ-software.csharpextensions"
     ]
 }
