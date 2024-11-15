@@ -79,6 +79,13 @@ namespace Bigai.TaskManager.Api.Controllers
             return CreateResponse(command, workUnitId);
         }
 
+        /// <summary>
+        /// Updates a existing work unit.
+        /// </summary>
+        /// <param name="command">Data to update the work unit.</param>
+        /// <param name="workUnitId">Identifier of the work unit from which you want to update.</param>
+        /// <param name="projectId">Identifier of the project from which you want to update the work unit.</param>
+        /// <returns></returns>
         [HttpPut]
         [Route("{workUnitId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -104,7 +111,6 @@ namespace Bigai.TaskManager.Api.Controllers
 
             return NoContent();
         }
-
 
         /// <summary>
         /// Remove a work unit.
