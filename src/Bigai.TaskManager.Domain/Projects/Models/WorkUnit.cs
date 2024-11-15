@@ -4,7 +4,7 @@ namespace Bigai.TaskManager.Domain.Projects.Models;
 
 public sealed class WorkUnit
 {
-    private readonly IList<History> _workUnits = new List<History>();
+    private readonly IList<History> _workUnitsHistory = new List<History>();
 
     public int Id { get; set; }
     public int? ProjectId { get; set; }
@@ -12,10 +12,18 @@ public sealed class WorkUnit
     public string Title { get; set; } = default!;
     public string Description { get; set; } = default!;
     public DateTime CreateDate { get; set; } = DateTime.Now;
-    public DateTime DueDate { get; set; }
-    public Status Status { get; set; }
+    public DateTime? DueDate { get; set; }
+    public Status? Status { get; set; }
     public Priority Priority { get; set; }
-    public IReadOnlyCollection<History> Historys => _workUnits.ToArray();
+    public IReadOnlyCollection<History> Historys
+    {
+        get { return _workUnitsHistory.ToArray(); }
+
+        init
+        {
+            _workUnitsHistory = value.ToArray();
+        }
+    }
 
     public WorkUnit() { }
 
@@ -26,7 +34,7 @@ public sealed class WorkUnit
         Title = title;
         Description = description;
         DueDate = dueDate;
-        Status = Status.Pending;
+        Status = Enums.Status.Pending;
         Priority = priority;
     }
 
@@ -50,10 +58,32 @@ public sealed class WorkUnit
         Status = status;
     }
 
-    public void RegisterChange(string changedData)
+    public WorkUnit? GetDelta(WorkUnit workUnitUpdating)
     {
-        History history = History.Create(this, changedData);
+        WorkUnit? delta = null;
 
-        _workUnits.Add(history);
+        string? title = Title != workUnitUpdating.Title ? workUnitUpdating.Title : null;
+        string? description = Description != workUnitUpdating.Description ? workUnitUpdating.Description : null;
+        DateTime? dueDate = DueDate != workUnitUpdating.DueDate ? workUnitUpdating.DueDate : null;
+        Status? status = Status != workUnitUpdating.Status ? workUnitUpdating.Status : null;
+
+        bool isUpdating = title != null || description != null || dueDate != null || status != null;
+        if (isUpdating)
+        {
+            delta = new WorkUnit
+            {
+                Title = string.IsNullOrEmpty(title) ? "" : title,
+                Description = string.IsNullOrEmpty(description) ? "" : description,
+                DueDate = dueDate,
+                Status = status
+            };
+        }
+
+        return delta;
+    }
+
+    public void AddHistory(History history)
+    {
+        _workUnitsHistory.Add(history);
     }
 }

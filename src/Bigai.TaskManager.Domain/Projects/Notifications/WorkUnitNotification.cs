@@ -5,5 +5,15 @@ namespace Bigai.TaskManager.Domain.Projects.Notifications
         protected WorkUnitNotification()
         {
         }
+
+        public static BussinessNotification WorkUnitNotRegistered()
+        {
+            return new BussinessNotification()
+            {
+                Code = nameof(WorkUnitNotRegistered),
+                Message = "Tarefa não cadastrada."
+            };
+        }
+
     }
 }

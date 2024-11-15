@@ -54,17 +54,30 @@ internal class ProjectRepository : IProjectRepository
         return workUnit.Id;
     }
 
-    public async Task RemoveProjectAsync(Project project, CancellationToken cancellationToken = default)
+    public async Task<int> RemoveProjectAsync(Project project, CancellationToken cancellationToken = default)
     {
         _taskManagerDbContext.Projects.Remove(project);
 
-        await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
+        var deletedRows = await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
+
+        return deletedRows;
     }
 
-    public async Task RemoveWorkUnitAsync(WorkUnit workUnit, CancellationToken cancellationToken = default)
+    public async Task<int> RemoveWorkUnitAsync(WorkUnit workUnit, CancellationToken cancellationToken = default)
     {
         _taskManagerDbContext.WorkUnits.Remove(workUnit);
 
-        await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
+        var deletedRows = await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
+
+        return deletedRows;
+    }
+
+    public async Task<int> UpdateAsync(WorkUnit updatedWorkUnit, CancellationToken cancellationToken = default)
+    {
+        _taskManagerDbContext.WorkUnits.Update(updatedWorkUnit);
+
+        var updatedRows = await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
+
+        return updatedRows;
     }
 }

@@ -1,6 +1,6 @@
 @Bigai_TaskManager_Api_HostAddress = http://localhost:5000
 @ProjectId = 1
-@TaskId = 1
+@WorkUnitId = 1
 
 ### Creates a new work unit for a project.
 POST {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks
@@ -15,16 +15,30 @@ Accept: application/json
   "priority": "Low"
 }
 
+### Updates a existing work unit.
+PUT {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks
+Content-Type: application/json
+Accept: application/json
+
+{
+  "projectId": "{{ProjectId}}",
+  "workUnitId": "{{WorkUnitId}}",
+  "title": "A new sample title who describe the task",
+  "description": "A new more detailed description of the task",
+  "dueDate": "2024-11-15T14:05:18.959Z",
+  "status": "InProgress"
+}
+
 ### Gets a list of work units associated with a project.
 GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks
 Accept: application/json
 
 
 ### Gets a work unit by its identifier.
-GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks/{{TaskId}}
+GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks/{{WorkUnitId}}
 Accept: application/json
 
 
 ### Remove a work unit.
-DELETE {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks/{{TaskId}}
+DELETE {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}/tasks/{{WorkUnitId}}
 Accept: application/json

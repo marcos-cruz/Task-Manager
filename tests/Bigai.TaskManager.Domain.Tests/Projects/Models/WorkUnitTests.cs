@@ -1,31 +1,34 @@
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
+using Bigai.TaskManager.Domain.Projects.Services;
 
 using FluentAssertions;
+
+using Moq;
 
 namespace Bigai.TaskManager.Domain.Tests.Projects.Models;
 
 public class WorkUnitTests
 {
     [Fact]
-    public void Create_Return_Instance_Task()
+    public void Create_Return_InstanceWorkUnit()
     {
         // arrange
-        WorkUnit task;
+        WorkUnit workUnit;
         var title = "task";
         var description = "description";
         var dueDate = DateTime.Now.AddDays(15);
         var priority = Priority.High;
 
         // act
-        task = WorkUnit.Create(title, description, dueDate, priority);
+        workUnit = WorkUnit.Create(title, description, dueDate, priority);
 
         // assert
-        task.Should().NotBeNull();
-        task.Title.Should().Be(title);
-        task.Description.Should().Be(description);
-        task.DueDate.Should().Be(dueDate);
-        task.Status.Should().Be(Status.Pending);
+        workUnit.Should().NotBeNull();
+        workUnit.Title.Should().Be(title);
+        workUnit.Description.Should().Be(description);
+        workUnit.DueDate.Should().Be(dueDate);
+        workUnit.Status.Should().Be(Status.Pending);
     }
 
     [Fact]
@@ -34,14 +37,14 @@ public class WorkUnitTests
         // arrange
         var userId = 1001;
         var dueDate = DateTime.Now.AddDays(15);
-        WorkUnit task = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
+        WorkUnit workUnit = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
 
         // act
-        task.AssignToUser(userId);
+        workUnit.AssignToUser(userId);
 
         // assert
-        task.Should().NotBeNull();
-        task.UserId.Should().Be(userId);
+        workUnit.Should().NotBeNull();
+        workUnit.UserId.Should().Be(userId);
     }
 
     [Fact]
@@ -50,14 +53,14 @@ public class WorkUnitTests
         // arrange
         var projectId = 1001;
         var dueDate = DateTime.Now.AddDays(15);
-        WorkUnit task = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
+        WorkUnit workUnit = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
 
         // act
-        task.AssignToProject(projectId);
+        workUnit.AssignToProject(projectId);
 
         // assert
-        task.Should().NotBeNull();
-        task.ProjectId.Should().Be(projectId);
+        workUnit.Should().NotBeNull();
+        workUnit.ProjectId.Should().Be(projectId);
     }
 
     [Fact]
@@ -65,12 +68,77 @@ public class WorkUnitTests
     {
         // arrange
         var dueDate = DateTime.Now.AddDays(15);
-        WorkUnit task = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
+        WorkUnit workUnit = WorkUnit.Create("Work unit title", "Work unit description", dueDate, Priority.High);
 
         // act
-        task.ChangeStatus(Status.InProgress);
+        workUnit.ChangeStatus(Status.InProgress);
 
         // assert
-        task.Status.Should().Be(Status.InProgress);
+        workUnit.Status.Should().Be(Status.InProgress);
     }
+
+    [Fact]
+    public void GetDelta_WhenChanges_ReturnsOnlyUpdatedData()
+    {
+        // arrange
+        var updatedTitle = "Title of work unit";
+        var updatedDescription = "Updated description";
+        var updatedDueDate = DateTime.Now.AddDays(10);
+        var updatedStatus = Status.InProgress;
+        var workUnitExisting = WorkUnit.Create("Title of work unit", "Description of work unit", DateTime.Now.AddDays(15), Priority.High);
+        var workUnitUpdating = WorkUnit.Create(updatedTitle, updatedDescription, updatedDueDate, Priority.High);
+        workUnitUpdating.ChangeStatus(updatedStatus);
+
+        // act
+        var delta = workUnitExisting.GetDelta(workUnitUpdating);
+
+        // assert
+        delta.Should().NotBeNull();
+        delta!.Title.Should().Be("");
+        delta.Description.Should().Be(updatedDescription);
+        delta.DueDate.Should().Be(updatedDueDate);
+        delta.Status.Should().Be(updatedStatus);
+    }
+
+    [Fact]
+    public void GetDelta_WhenNotChanges_ReturnsNull()
+    {
+        // arrange
+        var updatedTitle = "Title of work unit";
+        var updatedDescription = "Description of work unit";
+        var updatedDueDate = DateTime.Now.AddDays(10);
+        var workUnitExisting = WorkUnit.Create(updatedTitle, updatedDescription, updatedDueDate, Priority.High);
+        var workUnitUpdating = WorkUnit.Create(updatedTitle, updatedDescription, updatedDueDate, Priority.High);
+
+        // act
+        var delta = workUnitExisting.GetDelta(workUnitUpdating);
+
+        // assert
+        delta.Should().BeNull();
+    }
+
+    [Fact]
+    public void AddHistory_MustAddHistory()
+    {
+        // arrange
+        var existingWorkUnit = WorkUnit.Create("Title of work unit", "Description of work unit", DateTime.Now.AddDays(15), Priority.High);
+        var changeRequest = WorkUnit.Create("Updated title of work unit", "updated description of work unit", DateTime.Now.AddDays(10), Priority.High);
+        changeRequest.ChangeStatus(Status.InProgress);
+
+
+        var serializeServiceMock = new Mock<ISerializeService>();
+        serializeServiceMock
+            .Setup(repo => repo.WorkUnitToJson(It.IsAny<WorkUnit>()))
+            .Returns(Guid.NewGuid().ToString());
+
+        var changedValues = existingWorkUnit.GetDelta(changeRequest);
+        History history = History.Create(existingWorkUnit, changedValues!, serializeServiceMock.Object);
+
+        // act
+        existingWorkUnit.AddHistory(history);
+
+        // assert
+        existingWorkUnit.Historys.First().Should().Be(history);
+    }
+
 }
