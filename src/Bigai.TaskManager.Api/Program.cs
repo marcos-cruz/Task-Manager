@@ -7,6 +7,8 @@ using Bigai.TaskManager.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthentication()
@@ -16,6 +18,10 @@ builder.Services.AddAuthorization();
 // Add services to the container.
 builder.Services.AddApplication()
                 .AddInfrastructure(builder.Configuration);
+
+builder.Host.UseSerilog((context, configuration) =>
+            configuration.ReadFrom.Configuration(context.Configuration)
+        );
 
 builder.Services.AddControllers(options =>
 {
