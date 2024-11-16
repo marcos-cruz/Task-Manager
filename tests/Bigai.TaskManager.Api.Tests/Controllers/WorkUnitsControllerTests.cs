@@ -310,6 +310,3 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
-
-// TODO: Mock token para test integrado
-// https://stebet.net/mocking-jwt-tokens-in-asp-net-core-integration-tests/

@@ -63,6 +63,7 @@ public sealed class WorkUnit
         {
             case Enums.Status.Completed:
                 Finished = DateTime.Now;
+                Started = Started is null ? Finished : Started;
                 break;
             case Enums.Status.InProgress:
                 Finished = null;

@@ -85,10 +85,12 @@ internal class ProjectRepository : IProjectRepository
 
     public async Task<IReadOnlyCollection<IReportPeriod>> GetReportByRangeAsync(DateTime initialRange, DateTime finalRange, CancellationToken cancellationToken = default)
     {
-        double period = (finalRange - initialRange).TotalDays;
+        double period = (finalRange - initialRange).TotalDays == 0 ? 1 : (finalRange - initialRange).TotalDays;
+        initialRange = initialRange.AddDays(-1);
+        finalRange = finalRange.AddDays(1);
 
         var performancePeriod = await _taskManagerDbContext.WorkUnits
-            .Where(workUnit => workUnit.Started >= initialRange && workUnit.Finished <= finalRange)
+            .Where(workUnit => workUnit.Started > initialRange && workUnit.Finished < finalRange)
             .GroupBy(x => x.UserId)
             .Select(x => new PerformancePeriodDto
             {
@@ -103,6 +105,8 @@ internal class ProjectRepository : IProjectRepository
     public async Task<IReadOnlyCollection<IReportPeriod>> GetReportByProjectIdAsync(int projectId, DateTime initialRange, DateTime finalRange, CancellationToken cancellationToken = default)
     {
         double period = (finalRange - initialRange).TotalDays;
+        initialRange = initialRange.AddDays(-1);
+        finalRange = finalRange.AddDays(1);
 
         var performancePeriod = await _taskManagerDbContext.WorkUnits
             .Where(workUnit => workUnit.ProjectId == projectId && workUnit.Started >= initialRange && workUnit.Finished <= finalRange)

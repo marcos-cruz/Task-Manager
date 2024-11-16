@@ -1,7 +1,8 @@
 using System.Net;
 
 using Bigai.TaskManager.Api.Tests.Helpers;
-using Bigai.TaskManager.Application.Projects.Commands.CreateProject;
+using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
+using Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
 using Bigai.TaskManager.Application.Users;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
@@ -24,7 +25,7 @@ using Moq;
 
 namespace Bigai.TaskManager.Api.Tests.Controllers;
 
-public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Program>>
+public class ReportsControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly IProjectRepository _projectsRepositoryMock;
@@ -36,7 +37,7 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
     private readonly int _userId = 101;
     private readonly int _numberOfTasks = 17;
 
-    public ProjectsControllerTests(WebApplicationFactory<Program> factory)
+    public ReportsControllerTests(WebApplicationFactory<Program> factory)
     {
         var dbContext = GetInMemoryDbContext(_numberOfProjects, _userId, _numberOfTasks);
         _projectsRepositoryMock = new ProjectRepository(dbContext);
@@ -46,6 +47,7 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
         _userContextMock = new Mock<IUserContext>();
         var currentUser = new CurrentUser(101, []);
         _userContextMock.Setup(u => u.GetCurrentUser()).Returns(currentUser);
+
 
         _factory = factory.WithWebHostBuilder(builder =>
         {
@@ -116,124 +118,60 @@ public class ProjectsControllerTests : IClassFixture<WebApplicationFactory<Progr
     }
 
     [Fact]
-    public async Task GetByUserIdAsync_ReturnsStatus200OK()
+    public async Task GetReportByRangeAsync_ReturnsStatus200OK()
     {
         // arrange
+        var projects = await _projectsRepositoryMock.GetProjectsByUserIdAsync(_userId);
+        var project = projects.ToArray()[0];
+        var createDate = project.WorkUnits.ToArray()[0].CreateDate;
+
+        string initialPeriod = $"{createDate.Day:D2}/{createDate.Month:D2}/{createDate.Year}";
+        createDate = createDate.AddDays(30);
+        string finalPeriod = $"{createDate.Day:D2}/{createDate.Month:D2}/{createDate.Year}";
         var client = _factory.CreateClient();
 
         // act
-        var response = await client.GetAsync($"/api/projects/users/{_userId}");
+        var response = await client.GetAsync($"api/projects/performance/range?initialDate={initialPeriod}&finalDate={finalPeriod}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
-    public async Task GetProjectByIdAsync_ReturnsStatus200OK()
+    public async Task GetReportByPeriodAsync_ReturnsStatus200OK()
     {
         // arrange
         var projects = await _projectsRepositoryMock.GetProjectsByUserIdAsync(_userId);
         var project = projects.ToArray()[0];
+        var createDate = project.WorkUnits.ToArray()[0].CreateDate;
 
+        string initialPeriod = $"{createDate.Day:D2}/{createDate.Month:D2}/{createDate.Year}";
         var client = _factory.CreateClient();
 
         // act
-        var response = await client.GetAsync($"/api/projects/{project.Id}");
+        var response = await client.GetAsync($"api/projects/performance/period?initialDate={initialPeriod}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
-    public async Task GetProjectByIdAsync_ReturnsStatus404NotFound()
-    {
-        // arrange
-        int projectId = 101001001;
-        var client = _factory.CreateClient();
-
-        // act
-        var response = await client.GetAsync($"/api/projects/{projectId}");
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-    }
-
-    [Fact]
-    public async Task CreateAsync_ReturnsStatus201Created()
-    {
-        // arrange
-        var command = new CreateProjectCommand
-        {
-            Name = "Create new project test"
-        };
-
-        var client = _factory.CreateClient();
-
-        // act
-        var response = await client.PostAsync("/api/projects", TestHelper.GetJsonStringContent(command));
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-    }
-
-    [Fact]
-    public async Task CreateAsync_ReturnsStatus400BadRequest()
-    {
-        // arrange
-        var command = new CreateProjectCommand();
-
-        var client = _factory.CreateClient();
-
-        // act
-        var response = await client.PostAsync("/api/projects", TestHelper.GetJsonStringContent(command));
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task RemoveAsync_ReturnsStatus204NoContent()
+    public async Task GetReportByProjectIdAsync_ReturnsStatus200OK()
     {
         // arrange
         var projects = await _projectsRepositoryMock.GetProjectsByUserIdAsync(_userId);
         var project = projects.ToArray()[0];
+        var createDate = project.WorkUnits.ToArray()[0].CreateDate;
 
+        string initialPeriod = $"{createDate.Day:D2}/{createDate.Month:D2}/{createDate.Year}";
+        createDate = createDate.AddDays(30);
+        string finalPeriod = $"{createDate.Day:D2}/{createDate.Month:D2}/{createDate.Year}";
         var client = _factory.CreateClient();
 
         // act
-        var response = await client.DeleteAsync($"/api/projects/{project.Id}");
+        var response = await client.GetAsync($"api/projects/performance/{project.Id}/project?initialDate={initialPeriod}&finalDate={finalPeriod}");
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-    }
-
-    [Fact]
-    public async Task RemoveAsync_ReturnsStatus400BadRequest()
-    {
-        // arrange
-        var projects = await _projectsRepositoryMock.GetProjectsByUserIdAsync(_userId);
-        var project = projects.ToArray()[1];
-
-        var client = _factory.CreateClient();
-
-        // act
-        var response = await client.DeleteAsync($"/api/projects/{project.Id}");
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task RemoveAsync_ReturnsStatus404NotFound()
-    {
-        // arrange
-        int projectId = _numberOfProjects * 2;
-        var client = _factory.CreateClient();
-
-        // act
-        var response = await client.DeleteAsync($"/api/projects/{projectId}");
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }
