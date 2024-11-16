@@ -22,8 +22,8 @@ public class UserContextTests
         var claims = new List<Claim>()
         {
             new(ClaimTypes.NameIdentifier, "1"),
-            new(ClaimTypes.Role, ProjectRoles.Manager),
-            new(ClaimTypes.Role, ProjectRoles.User),
+            new(ClaimTypes.Role, TaskManagerRoles.Manager),
+            new(ClaimTypes.Role, TaskManagerRoles.User),
             new("UserId", $"{userId}"),
         };
 
@@ -43,7 +43,7 @@ public class UserContextTests
         // assert
         currentUser.Should().NotBeNull();
         currentUser!.UserId.Should().Be(userId);
-        currentUser.Roles.Should().ContainInOrder(ProjectRoles.Manager, ProjectRoles.User);
+        currentUser.Roles.Should().ContainInOrder(TaskManagerRoles.Manager, TaskManagerRoles.User);
     }
 
     [Fact]

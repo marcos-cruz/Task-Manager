@@ -8,11 +8,11 @@
     <Title>RestFul task management API that provides support for the user to organize and monitor their daily tasks, developed by Marcos Cruz.</Title>
     <Authors>Marcos Cruz</Authors>
     <Company>Bigai Software, Santo André, SP, Brazil.</Company>
-    <Description>Serviço de consumo de protocolos da fila RabbitMQ.</Description>
+    <Description>Task management system.</Description>
     <RepositoryUrl>https://github.com/marcos-cruz/Task-Manager</RepositoryUrl>
     <Copyright>Copyright ©2024 Marcos Cruz, All rights reserved.</Copyright>
     <NoWarn>$(NoWarn);1591</NoWarn>    
-    <UserSecretsId>26083919-a2f5-42c8-99fe-7e79419ab24a</UserSecretsId>
+    <UserSecretsId>45de0ac2-928e-43d2-b26f-045837e69fa4</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

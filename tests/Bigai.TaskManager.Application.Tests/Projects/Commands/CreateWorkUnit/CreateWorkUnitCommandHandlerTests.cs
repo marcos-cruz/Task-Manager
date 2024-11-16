@@ -134,7 +134,7 @@ public class CreateWorkUnitCommandHandlerTests
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        workUnitId.Should().Be(ProjectRoles.NotFound);
+        workUnitId.Should().Be(TaskManagerRoles.NotFound);
     }
 
     [Fact()]
@@ -177,7 +177,7 @@ public class CreateWorkUnitCommandHandlerTests
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        workUnitId.Should().Be(ProjectRoles.Forbidden);
+        workUnitId.Should().Be(TaskManagerRoles.Forbidden);
     }
 
 }

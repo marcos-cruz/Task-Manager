@@ -1,3 +1,5 @@
+using Bigai.TaskManager.Application.Projects.Dtos;
+using Bigai.TaskManager.Domain.Projects.Contracts;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
 using Bigai.TaskManager.Infrastructure.Persistence;
@@ -79,5 +81,39 @@ internal class ProjectRepository : IProjectRepository
         var updatedRows = await _taskManagerDbContext.SaveChangesAsync(cancellationToken);
 
         return updatedRows;
+    }
+
+    public async Task<IReadOnlyCollection<IReportPeriod>> GetReportByRangeAsync(DateTime initialRange, DateTime finalRange, CancellationToken cancellationToken = default)
+    {
+        double period = (finalRange - initialRange).TotalDays;
+
+        var performancePeriod = await _taskManagerDbContext.WorkUnits
+            .Where(workUnit => workUnit.Started >= initialRange && workUnit.Finished <= finalRange)
+            .GroupBy(x => x.UserId)
+            .Select(x => new PerformancePeriodDto
+            {
+                TotalMonth = x.Count(),
+                UserId = x.Key,
+                AverageMonth = x.Count() / period
+            }).ToListAsync(cancellationToken);
+
+        return performancePeriod;
+    }
+
+    public async Task<IReadOnlyCollection<IReportPeriod>> GetReportByProjectIdAsync(int projectId, DateTime initialRange, DateTime finalRange, CancellationToken cancellationToken = default)
+    {
+        double period = (finalRange - initialRange).TotalDays;
+
+        var performancePeriod = await _taskManagerDbContext.WorkUnits
+            .Where(workUnit => workUnit.ProjectId == projectId && workUnit.Started >= initialRange && workUnit.Finished <= finalRange)
+            .GroupBy(x => x.UserId)
+            .Select(x => new PerformancePeriodDto
+            {
+                TotalMonth = x.Count(),
+                UserId = x.Key,
+                AverageMonth = x.Count() / period
+            }).ToListAsync(cancellationToken);
+
+        return performancePeriod;
     }
 }

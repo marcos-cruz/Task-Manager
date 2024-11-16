@@ -36,14 +36,14 @@ namespace Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit
             {
                 _notificationsHandler.NotifyError(ProjectNotification.ProjectNotRegistered());
 
-                return ProjectRoles.NotFound;
+                return TaskManagerRoles.NotFound;
             }
 
             if (!_projectAuthorizationService.AuthorizeLimit(project))
             {
                 _notificationsHandler.NotifyError(ProjectNotification.TaskLimitReached());
 
-                return ProjectRoles.Forbidden;
+                return TaskManagerRoles.Forbidden;
             }
 
             var currentUser = _userContext.GetCurrentUser();

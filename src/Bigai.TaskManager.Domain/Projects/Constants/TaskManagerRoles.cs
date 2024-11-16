@@ -1,6 +1,6 @@
 namespace Bigai.TaskManager.Domain.Projects.Constants;
 
-public static class ProjectRoles
+public static class TaskManagerRoles
 {
     public const int MaximumTaskLimit = 20;
 

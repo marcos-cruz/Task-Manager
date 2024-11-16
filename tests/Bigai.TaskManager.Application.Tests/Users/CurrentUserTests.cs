@@ -12,10 +12,10 @@ public class CurrentUserTests
     {
         // Arrange
         int userId = 101;
-        var currentUser = new CurrentUser(userId, [ProjectRoles.Manager, ProjectRoles.User]);
+        var currentUser = new CurrentUser(userId, [TaskManagerRoles.Manager, TaskManagerRoles.User]);
 
         // Act
-        var isInRole = currentUser.IsInRole(ProjectRoles.Manager);
+        var isInRole = currentUser.IsInRole(TaskManagerRoles.Manager);
 
         // Assert
         isInRole.Should().BeTrue();
@@ -26,10 +26,10 @@ public class CurrentUserTests
     {
         // Arrange
         int userId = 101;
-        var currentUser = new CurrentUser(userId, [ProjectRoles.User]);
+        var currentUser = new CurrentUser(userId, [TaskManagerRoles.User]);
 
         // Act
-        var isInRole = currentUser.IsInRole(ProjectRoles.Manager);
+        var isInRole = currentUser.IsInRole(TaskManagerRoles.Manager);
 
         // Assert
         isInRole.Should().BeFalse();
@@ -40,10 +40,10 @@ public class CurrentUserTests
     {
         // Arrange
         int userId = 101;
-        var currentUser = new CurrentUser(userId, [ProjectRoles.Manager, ProjectRoles.User]);
+        var currentUser = new CurrentUser(userId, [TaskManagerRoles.Manager, TaskManagerRoles.User]);
 
         // Act
-        var isInRole = currentUser.IsInRole(ProjectRoles.Manager.ToLower());
+        var isInRole = currentUser.IsInRole(TaskManagerRoles.Manager.ToLower());
 
         // Assert
         isInRole.Should().BeFalse();

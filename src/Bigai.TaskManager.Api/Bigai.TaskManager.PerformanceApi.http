@@ -1,38 +1,16 @@
 @Bigai_TaskManager_Api_HostAddress = http://localhost:5000
-
 @ProjectId = 1
+
+@WorkUnitId = 1
 
 @UserToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IlRhc2tNYW5hZ2VyIiwic3ViIjoiVGFza01hbmFnZXIiLCJqdGkiOiI3N2MyNGNjOSIsInJvbGUiOiJVc2VyIiwidXNlcklkIjoiNDYyIiwiYXVkIjpbImh0dHA6Ly9sb2NhbGhvc3Q6NDQxMSIsImh0dHBzOi8vbG9jYWxob3N0OjQ0MzUyIiwiaHR0cHM6Ly9sb2NhbGhvc3Q6NTAwMSIsImh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCJdLCJuYmYiOjE3MzE2OTQ1NDQsImV4cCI6MTc2MzIzMDU0NCwiaWF0IjoxNzMxNjk0NTQ3LCJpc3MiOiJkb3RuZXQtdXNlci1qd3RzIn0.sHQC7gqtY1_RCCo8v4H6b6nBj0iYzuIM5bjoOkvdZUo
 
 @ManagerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IlRhc2tNYW5hZ2VyIiwic3ViIjoiVGFza01hbmFnZXIiLCJqdGkiOiI1OGRhNTVkOSIsInJvbGUiOiJNYW5hZ2VyIiwidXNlcklkIjoiMzY1IiwiYXVkIjpbImh0dHA6Ly9sb2NhbGhvc3Q6NDQxMSIsImh0dHBzOi8vbG9jYWxob3N0OjQ0MzUyIiwiaHR0cHM6Ly9sb2NhbGhvc3Q6NTAwMSIsImh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCJdLCJuYmYiOjE3MzE3MTc5NTcsImV4cCI6MTc2MzI1Mzk1NywiaWF0IjoxNzMxNzE3OTU3LCJpc3MiOiJkb3RuZXQtdXNlci1qd3RzIn0.w5cY9oAEaYil57JjbtMsadKlU4rIsSYcF5HHZG5rN1Q
 
-
-### Create a new project.
-POST {{Bigai_TaskManager_Api_HostAddress}}/api/projects/
-Content-Type: application/json
+@Initial = "15/11/2024 23:24:15"
+@Final = "15/12/2024 23:24:15"
+### Gets a list of work units associated with a project.
+GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/performance?InitialPeriod=14042024&FinalPeriod=14042055
 Accept: application/json
-Authorization: Bearer {{UserToken}}
-#Authorization: Bearer {{ManagerToken}}
-
-{
-  "name": "A sample name of project"
-}
-
-
-### Gets all registered projects of a user.
-GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/users/{{ProjectId}}
-Accept: application/json
-Authorization: Bearer {{UserToken}}
-#Authorization: Bearer {{ManagerToken}}
-
-### Gets a project by its identifier.
-GET {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}
-Accept: application/json
-Authorization: Bearer {{UserToken}}
-#Authorization: Bearer {{ManagerToken}}
-
-### Gets a project by its identifier.
-DELETE {{Bigai_TaskManager_Api_HostAddress}}/api/projects/{{ProjectId}}
-Accept: application/json
-Authorization: Bearer {{UserToken}}
-#Authorization: Bearer {{ManagerToken}}
+#Authorization: Bearer {{UserToken}}
+Authorization: Bearer {{ManagerToken}}
