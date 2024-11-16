@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Bigai.TaskManager.Api.Middlewares;
 using Bigai.TaskManager.Application;
 using Bigai.TaskManager.Infrastructure;
+using Bigai.TaskManager.Infrastructure.Persistence;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
@@ -89,6 +90,8 @@ try
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
+        await app.Services.InitializeDatabaseAsync();
+
         app.UseSwagger();
         app.UseSwaggerUI();
     }

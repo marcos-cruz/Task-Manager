@@ -1,8 +1,6 @@
 using System.Net;
 
 using Bigai.TaskManager.Api.Tests.Helpers;
-using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
-using Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
 using Bigai.TaskManager.Application.Users;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;

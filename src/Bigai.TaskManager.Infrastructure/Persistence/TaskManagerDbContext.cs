@@ -6,9 +6,9 @@ namespace Bigai.TaskManager.Infrastructure.Persistence;
 
 internal class TaskManagerDbContext : DbContext
 {
-    internal DbSet<Project> Projects { get; set; }
-    internal DbSet<WorkUnit> WorkUnits { get; set; }
-    internal DbSet<History> Histories { get; set; }
+    internal DbSet<Project> Projects { get; set; } = default!;
+    internal DbSet<WorkUnit> WorkUnits { get; set; } = default!;
+    internal DbSet<History> Histories { get; set; } = default!;
 
     public TaskManagerDbContext(DbContextOptions<TaskManagerDbContext> options) : base(options)
     {
