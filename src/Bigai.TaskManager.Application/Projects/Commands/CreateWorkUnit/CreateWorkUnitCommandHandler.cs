@@ -1,4 +1,6 @@
 
+using System.Net;
+
 using Bigai.TaskManager.Application.Projects.Mappers;
 using Bigai.TaskManager.Application.Users;
 using Bigai.TaskManager.Domain.Projects.Constants;
@@ -35,15 +37,17 @@ namespace Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit
             if (project == null)
             {
                 _notificationsHandler.NotifyError(ProjectNotification.ProjectNotRegistered());
+                _notificationsHandler.StatusCode = HttpStatusCode.NotFound;
 
-                return ProjectRoles.NotFound;
+                return TaskManagerRoles.Error;
             }
 
             if (!_projectAuthorizationService.AuthorizeLimit(project))
             {
-                _notificationsHandler.NotifyError(ProjectNotification.TaskLimitReached());
+                _notificationsHandler.NotifyError(ProjectNotification.ProjectTaskLimitReached());
+                _notificationsHandler.StatusCode = HttpStatusCode.BadRequest;
 
-                return ProjectRoles.Forbidden;
+                return TaskManagerRoles.Error;
             }
 
             var currentUser = _userContext.GetCurrentUser();
@@ -51,6 +55,8 @@ namespace Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit
             workUnit.AssignToUser(currentUser!.UserId);
 
             var workUnitId = await _projectsRepository.CreateAsync(workUnit);
+
+            _notificationsHandler.StatusCode = HttpStatusCode.Created;
 
             return workUnitId;
         }

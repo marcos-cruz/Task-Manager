@@ -1,3 +1,4 @@
+using Bigai.TaskManager.Domain.Projects.Contracts;
 using Bigai.TaskManager.Domain.Projects.Models;
 
 namespace Bigai.TaskManager.Domain.Projects.Repositories;
@@ -15,6 +16,10 @@ public interface IProjectRepository
     Task<Project?> GetProjectByIdAsync(int projectId, CancellationToken cancellationToken = default);
 
     Task<WorkUnit?> GetWorkUnitByIdAsync(int projectId, int workUnitId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<IReportPeriod>> GetReportByRangeAsync(DateTime initialRange, DateTime finalRange, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<IReportPeriod>> GetReportByProjectIdAsync(int projectId, DateTime initialRange, DateTime finalRange, CancellationToken cancellationToken = default);
 
     Task<int> RemoveProjectAsync(Project project, CancellationToken cancellationToken = default);
 

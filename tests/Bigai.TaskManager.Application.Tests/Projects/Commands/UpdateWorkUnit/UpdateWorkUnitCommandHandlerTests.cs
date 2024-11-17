@@ -2,6 +2,7 @@ using System.Net;
 
 using Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
 using Bigai.TaskManager.Application.Users;
+using Bigai.TaskManager.Domain.Projects.Constants;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Infrastructure.Persistence;
@@ -57,7 +58,7 @@ public class UpdateWorkUnitCommandHandlerTests
     }
 
     [Fact()]
-    public async Task Handle_ForValidCommand_ReturnsWorkUnitId()
+    public async Task Handle_ForValidCommand_ReturnsSuccess()
     {
         // arrange
         int numberOfProjects = 1;
@@ -98,7 +99,7 @@ public class UpdateWorkUnitCommandHandlerTests
         var statusCode = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        statusCode.Should().Be(HttpStatusCode.NoContent);
+        statusCode.Should().Be(TaskManagerRoles.Success);
+        notificationHandler.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
-
 }

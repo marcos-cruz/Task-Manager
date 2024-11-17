@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Net;
 
 using Bigai.TaskManager.Domain.Projects.Enums;
 
@@ -7,7 +6,7 @@ using MediatR;
 
 namespace Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
 
-public class UpdateWorkUnitCommand : IRequest<HttpStatusCode>
+public class UpdateWorkUnitCommand : IRequest<int>
 {
     [Required()]
     public int ProjectId { get; set; }

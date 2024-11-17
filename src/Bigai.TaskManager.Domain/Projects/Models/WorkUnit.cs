@@ -14,6 +14,8 @@ public sealed class WorkUnit
     public DateTime CreateDate { get; set; } = DateTime.Now;
     public DateTime? DueDate { get; set; }
     public Status? Status { get; set; }
+    public DateTime? Started { get; set; }
+    public DateTime? Finished { get; set; }
     public Priority Priority { get; set; }
     public IReadOnlyCollection<History> Historys
     {
@@ -56,6 +58,23 @@ public sealed class WorkUnit
     public void ChangeStatus(Status status)
     {
         Status = status;
+
+        switch (Status)
+        {
+            case Enums.Status.Completed:
+                Finished = DateTime.Now;
+                Started = Started is null ? Finished : Started;
+                break;
+            case Enums.Status.InProgress:
+                Finished = null;
+                Started = DateTime.Now;
+                break;
+
+            default:
+                Finished = null;
+                Started = null;
+                break;
+        }
     }
 
     public WorkUnit? GetDelta(WorkUnit workUnitUpdating)

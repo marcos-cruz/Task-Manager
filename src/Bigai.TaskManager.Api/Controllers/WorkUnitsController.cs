@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
 using Bigai.TaskManager.Application.Projects.Commands.RemoveWorkUnit;
 using Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
@@ -5,6 +7,7 @@ using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitById;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitsProjectById;
 using Bigai.TaskManager.Domain.Projects.Notifications;
+using Bigai.TaskManager.Domain.Projects.Services;
 
 using MediatR;
 
@@ -16,13 +19,10 @@ namespace Bigai.TaskManager.Api.Controllers
     [ApiController]
     [Route("api/projects/{projectId}/tasks/")]
     [Authorize]
-    public class WorkUnitsController : ControllerBase
+    public class WorkUnitsController : MainController
     {
-        private readonly IMediator _mediator;
-
-        public WorkUnitsController(IMediator mediator)
+        public WorkUnitsController(IMediator mediator, IBussinessNotificationsHandler bussinessNotificationsHandler) : base(bussinessNotificationsHandler, mediator)
         {
-            _mediator = mediator;
         }
 
         /// <summary>
@@ -35,11 +35,11 @@ namespace Bigai.TaskManager.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<WorkUnitDto>>> GetWorkUnitsByProjectIdAsync([FromRoute] int projectId)
+        public async Task<ActionResult<IEnumerable<WorkUnitDto>>> GetWorkUnitsByProjectIdAsync([FromRoute][Required] int projectId)
         {
             var workUnits = await _mediator.Send(new GetUnitWorksProjectByIdQuery(projectId));
 
-            return workUnits is null ? NotFound() : Ok(workUnits);
+            return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : Ok(workUnits);
         }
 
         /// <summary>
@@ -54,11 +54,11 @@ namespace Bigai.TaskManager.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<WorkUnitDto?>> GetWorkUnitByIdAsync([FromRoute] int workUnitId, int projectId)
+        public async Task<ActionResult<WorkUnitDto?>> GetWorkUnitByIdAsync([FromRoute][Required] int workUnitId, [Required] int projectId)
         {
             var workUnit = await _mediator.Send(new GetWorkUnitByIdQuery(projectId, workUnitId));
 
-            return workUnit is null ? NotFound() : Ok(workUnit);
+            return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : Ok(workUnit);
         }
 
         /// <summary>
@@ -73,18 +73,23 @@ namespace Bigai.TaskManager.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateWorkUnitCommand command, int projectId)
+        public async Task<IActionResult> CreateAsync([FromBody][Required] CreateWorkUnitCommand command, [Required] int projectId)
         {
+            if (!ModelState.IsValid)
+            {
+                return GetResponse(ModelState);
+            }
+
             if (projectId != command.ProjectId)
             {
                 ModelState.AddModelError(nameof(projectId), ProjectNotification.ProjectNotRegistered().Message);
 
-                return BadRequest();
+                return GetResponse(ModelState);
             }
 
             var workUnitId = await _mediator.Send(command);
 
-            return CreateResponse(command, workUnitId);
+            return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : CreatedAtAction(nameof(GetWorkUnitByIdAsync), new { command.ProjectId, workUnitId }, null);
         }
 
         /// <summary>
@@ -101,25 +106,30 @@ namespace Bigai.TaskManager.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateAsync([FromBody] UpdateWorkUnitCommand command, [FromRoute] int workUnitId, int projectId)
+        public async Task<IActionResult> UpdateAsync([FromBody] UpdateWorkUnitCommand command, [FromRoute][Required] int workUnitId, [Required] int projectId)
         {
+            if (!ModelState.IsValid)
+            {
+                return GetResponse(ModelState);
+            }
+
             if (projectId != command.ProjectId)
             {
                 ModelState.AddModelError(nameof(projectId), ProjectNotification.ProjectNotRegistered().Message);
 
-                return BadRequest();
+                return GetResponse(ModelState);
             }
 
             if (workUnitId != command.WorkUnitId)
             {
                 ModelState.AddModelError(nameof(workUnitId), WorkUnitNotification.WorkUnitNotRegistered().Message);
 
-                return BadRequest();
+                return GetResponse(ModelState);
             }
 
-            var statusCode = await _mediator.Send(command);
+            await _mediator.Send(command);
 
-            return NoContent();
+            return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : NoContent();
         }
 
         /// <summary>
@@ -134,16 +144,11 @@ namespace Bigai.TaskManager.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> RemoveAsync([FromRoute] int workUnitId, int projectId)
+        public async Task<IActionResult> RemoveAsync([FromRoute][Required] int workUnitId, [Required] int projectId)
         {
-            var removed = await _mediator.Send(new RemoveWorkUnitByIdCommand(projectId, workUnitId));
+            await _mediator.Send(new RemoveWorkUnitByIdCommand(projectId, workUnitId));
 
-            return removed ? NoContent() : NotFound();
-        }
-
-        private IActionResult CreateResponse(CreateWorkUnitCommand command, int workUnitId)
-        {
-            return workUnitId * -1 == StatusCodes.Status404NotFound ? NotFound() : CreatedAtAction(nameof(GetWorkUnitByIdAsync), new { command.ProjectId, workUnitId }, null);
+            return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : NoContent();
         }
     }
 }

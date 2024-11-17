@@ -15,14 +15,23 @@ namespace Bigai.TaskManager.Domain.Projects.Notifications
             };
         }
 
-        public static BussinessNotification TaskLimitReached()
+        public static BussinessNotification ProjectTaskLimitReached()
         {
             return new BussinessNotification()
             {
-                Code = nameof(TaskLimitReached),
+                Code = nameof(ProjectTaskLimitReached),
                 Message = "Projeto já atingiu o limite máximo de tarefas permitido."
             };
         }
 
+        public static BussinessNotification ProjectHasPendingWorkUnit(int projectId)
+        {
+            return new BussinessNotification()
+            {
+                Code = nameof(ProjectHasPendingWorkUnit),
+                Message = $"O projeto {projectId} possuí tarefas pendentes. Sugerimos a conclusão do projeto ou remoção das tarefas primeiro."
+
+            };
+        }
     }
 }

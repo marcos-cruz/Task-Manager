@@ -7,5 +7,5 @@ namespace Bigai.TaskManager.Domain.Projects.Services;
 public interface IProjectAuthorizationService
 {
     bool Authorize(Project? project, ResourceOperation resourceOperation);
-    bool AuthorizeLimit(Project? project, int MaximumTaskLimit = ProjectRoles.MaximumTaskLimit);
+    bool AuthorizeLimit(Project? project, int MaximumTaskLimit = TaskManagerRoles.MaximumTaskLimit);
 }

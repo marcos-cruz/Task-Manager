@@ -1,10 +1,14 @@
+using System.Net;
+
 using Bigai.TaskManager.Application.Projects.Commands.RemoveWorkUnit;
+using Bigai.TaskManager.Domain.Projects.Constants;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
 using Bigai.TaskManager.Domain.Tests.Helpers;
 using Bigai.TaskManager.Infrastructure.Persistence;
 using Bigai.TaskManager.Infrastructure.Projects.Repositories;
+using Bigai.TaskManager.Infrastructure.Projects.Services;
 
 using FluentAssertions;
 
@@ -55,7 +59,7 @@ public class RemoveWorkUnitByIdCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenWorkUnitDoesNotExist_ReturnsFalse()
+    public async Task Handle_WhenWorkUnitDoesNotExist_ReturnsError()
     {
         // arrange
         int numberOfProjects = 1;
@@ -68,18 +72,20 @@ public class RemoveWorkUnitByIdCommandHandlerTests
         var repository = new ProjectRepository(dbContext);
 
         var command = new RemoveWorkUnitByIdCommand(projectId, workUnitId);
+        var notificationHandler = new BussinessNotificationsHandler();
 
-        var commandHandler = new RemoveWorkUnitByIdCommandHandler(repository);
+        var commandHandler = new RemoveWorkUnitByIdCommandHandler(repository, notificationHandler);
 
         // act
         var removed = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        removed.Should().Be(false);
+        removed.Should().Be(TaskManagerRoles.Error);
+        notificationHandler.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
-    public async Task Handle_WhenWorkUnitExists_ReturnsTrue()
+    public async Task Handle_WhenWorkUnitExists_ReturnsSuccess()
     {
         // arrange
         int amountProjects = 1;
@@ -94,13 +100,15 @@ public class RemoveWorkUnitByIdCommandHandlerTests
             .ReturnsAsync(workUnit);
 
         var command = new RemoveWorkUnitByIdCommand(project.Id, workUnit.Id);
+        var notificationHandler = new BussinessNotificationsHandler();
 
-        var commandHandler = new RemoveWorkUnitByIdCommandHandler(projectRepositoryMock.Object);
+        var commandHandler = new RemoveWorkUnitByIdCommandHandler(projectRepositoryMock.Object, notificationHandler);
 
         // act
         var removed = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        removed.Should().Be(true);
+        removed.Should().Be(TaskManagerRoles.Success);
+        notificationHandler.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 }

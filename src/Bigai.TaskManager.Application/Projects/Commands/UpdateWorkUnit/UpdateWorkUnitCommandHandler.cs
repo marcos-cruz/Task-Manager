@@ -3,6 +3,7 @@ using System.Net;
 
 using Bigai.TaskManager.Application.Projects.Mappers;
 using Bigai.TaskManager.Application.Users;
+using Bigai.TaskManager.Domain.Projects.Constants;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Notifications;
 using Bigai.TaskManager.Domain.Projects.Repositories;
@@ -12,7 +13,7 @@ using MediatR;
 
 namespace Bigai.TaskManager.Application.Projects.Commands.UpdateWorkUnit;
 
-public class UpdateWorkUnitCommandHandler : IRequestHandler<UpdateWorkUnitCommand, HttpStatusCode>
+public class UpdateWorkUnitCommandHandler : IRequestHandler<UpdateWorkUnitCommand, int>
 {
     private readonly IProjectRepository _projectsRepository;
     private readonly IBussinessNotificationsHandler _notificationsHandler;
@@ -30,15 +31,16 @@ public class UpdateWorkUnitCommandHandler : IRequestHandler<UpdateWorkUnitComman
         _userContext = userContext;
     }
 
-    public async Task<HttpStatusCode> Handle(UpdateWorkUnitCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(UpdateWorkUnitCommand request, CancellationToken cancellationToken)
     {
         var existingWorkUnit = await _projectsRepository.GetWorkUnitByIdAsync(request.ProjectId, request.WorkUnitId);
 
         if (existingWorkUnit == null)
         {
             _notificationsHandler.NotifyError(WorkUnitNotification.WorkUnitNotRegistered());
+            _notificationsHandler.StatusCode = HttpStatusCode.NotFound;
 
-            return HttpStatusCode.NotFound;
+            return TaskManagerRoles.Error;
         }
 
         var changeRequest = request.AsEntity(existingWorkUnit);
@@ -57,6 +59,8 @@ public class UpdateWorkUnitCommandHandler : IRequestHandler<UpdateWorkUnitComman
             await _projectsRepository.UpdateAsync(existingWorkUnit);
         }
 
-        return HttpStatusCode.NoContent;
+        _notificationsHandler.StatusCode = HttpStatusCode.NoContent;
+
+        return TaskManagerRoles.Success;
     }
 }

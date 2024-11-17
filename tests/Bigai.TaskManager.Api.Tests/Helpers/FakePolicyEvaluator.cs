@@ -20,8 +20,8 @@ public class FakePolicyEvaluator : IPolicyEvaluator
             new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, "1"),
-                new Claim(ClaimTypes.Role, ProjectRoles.Manager),
-                new Claim(ClaimTypes.Role, ProjectRoles.User),
+                new Claim(ClaimTypes.Role, TaskManagerRoles.Manager),
+                new Claim(ClaimTypes.Role, TaskManagerRoles.User),
                 new Claim("UserId", $"{userId}"),
             })
         );
