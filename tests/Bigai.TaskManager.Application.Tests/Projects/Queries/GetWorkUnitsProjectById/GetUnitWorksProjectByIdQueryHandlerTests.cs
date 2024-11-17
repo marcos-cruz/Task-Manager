@@ -1,8 +1,12 @@
+using System.Net;
+
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Application.Projects.Queries.GetWorkUnitsProjectById;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
+using Bigai.TaskManager.Domain.Projects.Services;
 using Bigai.TaskManager.Domain.Tests.Helpers;
+using Bigai.TaskManager.Infrastructure.Projects.Services;
 
 using FluentAssertions;
 
@@ -14,11 +18,14 @@ public class GetUnitWorksProjectByIdQueryHandlerTests
 {
     private readonly Mock<IProjectRepository> _projectsRepositoryMock;
     private readonly GetUnitWorksProjectByIdQueryHandler _queryHandler;
+    private readonly IBussinessNotificationsHandler _notificationsHandler;
+
 
     public GetUnitWorksProjectByIdQueryHandlerTests()
     {
         _projectsRepositoryMock = new Mock<IProjectRepository>();
-        _queryHandler = new GetUnitWorksProjectByIdQueryHandler(_projectsRepositoryMock.Object);
+        _notificationsHandler = new BussinessNotificationsHandler();
+        _queryHandler = new GetUnitWorksProjectByIdQueryHandler(_projectsRepositoryMock.Object, _notificationsHandler);
     }
 
     [Fact()]
@@ -38,6 +45,7 @@ public class GetUnitWorksProjectByIdQueryHandlerTests
 
         // assert
         result.Should().BeNull();
+        _notificationsHandler.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact()]
@@ -59,7 +67,7 @@ public class GetUnitWorksProjectByIdQueryHandlerTests
 
         // assert
         result.Should().NotBeNullOrEmpty();
+        _notificationsHandler.StatusCode.Should().Be(HttpStatusCode.OK);
         Assert.IsAssignableFrom<IEnumerable<WorkUnitDto>>(result);
     }
-
 }

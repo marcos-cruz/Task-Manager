@@ -1,3 +1,5 @@
+using System.Net;
+
 using Bigai.TaskManager.Application.Projects.Commands.CreateWorkUnit;
 using Bigai.TaskManager.Application.Users;
 using Bigai.TaskManager.Domain.Projects.Constants;
@@ -96,10 +98,11 @@ public class CreateWorkUnitCommandHandlerTests
 
         // assert
         workUnitId.Should().BeGreaterThan(0);
+        notificationHandler.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 
     [Fact()]
-    public async Task Handle_ForValidCommandWithNoExistenteProject_ReturnsNotFound()
+    public async Task Handle_ForValidCommandWithNoExistenteProject_ReturnsError()
     {
         // arrange
         int numberOfProjects = 1;
@@ -134,11 +137,12 @@ public class CreateWorkUnitCommandHandlerTests
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        workUnitId.Should().Be(TaskManagerRoles.NotFound);
+        workUnitId.Should().Be(TaskManagerRoles.Error);
+        notificationHandler.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact()]
-    public async Task Handle_ForValidCommandAndProjectWithOverrunTasks_ReturnsForbidden()
+    public async Task Handle_ForValidCommandAndProjectWithOverrunTasks_ReturnsError()
     {
         // arrange
         int numberOfProjects = 1;
@@ -177,7 +181,8 @@ public class CreateWorkUnitCommandHandlerTests
         var workUnitId = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        workUnitId.Should().Be(TaskManagerRoles.Forbidden);
+        workUnitId.Should().Be(TaskManagerRoles.Error);
+        notificationHandler.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
 }

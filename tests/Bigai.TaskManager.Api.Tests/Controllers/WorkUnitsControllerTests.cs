@@ -32,6 +32,7 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
     private readonly IProjectAuthorizationService _projectAuthorizationServiceMock;
     private readonly ISerializeService _serializeService;
     private readonly Mock<IUserContext> _userContextMock;
+    private readonly IBussinessNotificationsHandler _bussinessNotificationsHandler;
 
     private readonly int _numberOfProjects = 7;
     private readonly int _userId = 101;
@@ -43,6 +44,7 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
         _projectsRepositoryMock = new ProjectRepository(dbContext);
         _projectAuthorizationServiceMock = new ProjectAuthorizationService();
         _serializeService = new SerializeService();
+        _bussinessNotificationsHandler = new BussinessNotificationsHandler();
 
         _userContextMock = new Mock<IUserContext>();
         var currentUser = new CurrentUser(101, []);
@@ -59,6 +61,7 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
                 services.Replace(ServiceDescriptor.Scoped(typeof(IProjectAuthorizationService), _ => _projectAuthorizationServiceMock));
                 services.Replace(ServiceDescriptor.Scoped(typeof(ISerializeService), _ => _serializeService));
                 services.Replace(ServiceDescriptor.Scoped(typeof(IUserContext), _ => _userContextMock.Object));
+                services.Replace(ServiceDescriptor.Scoped(typeof(IBussinessNotificationsHandler), _ => _bussinessNotificationsHandler));
             });
         });
     }
@@ -117,7 +120,6 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
         return projects;
     }
 
-
     [Fact]
     public async Task GetWorkUnitsByProjectIdAsync_ReturnsStatus200OK()
     {
@@ -166,7 +168,7 @@ public class WorkUnitsControllerTests : IClassFixture<WebApplicationFactory<Prog
     }
 
     [Fact]
-    public async Task GetProjectByIdAsync_ReturnsStatus404NotFound()
+    public async Task GetUnitWorkByIdAsync_ReturnsStatus404NotFound()
     {
         // arrange
         var projectId = 101001;

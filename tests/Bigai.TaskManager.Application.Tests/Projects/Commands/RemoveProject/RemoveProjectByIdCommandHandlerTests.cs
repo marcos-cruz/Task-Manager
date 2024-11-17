@@ -1,9 +1,13 @@
+using System.Net;
+
 using Bigai.TaskManager.Application.Projects.Commands.RemoveProject;
+using Bigai.TaskManager.Domain.Projects.Constants;
 using Bigai.TaskManager.Domain.Projects.Enums;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
 using Bigai.TaskManager.Domain.Projects.Services;
 using Bigai.TaskManager.Domain.Tests.Helpers;
+using Bigai.TaskManager.Infrastructure.Projects.Services;
 
 using FluentAssertions;
 
@@ -14,7 +18,7 @@ namespace Bigai.TaskManager.Application.Tests.Projects.Commands.RemoveProject;
 public class RemoveProjectByIdCommandHandlerTests
 {
     [Fact]
-    public async Task Handle_WhenProjectDoesNotExist_ReturnsNUll()
+    public async Task Handle_WhenProjectDoesNotExist_ReturnsError()
     {
         // arrange
         Project? project = null;
@@ -27,18 +31,18 @@ public class RemoveProjectByIdCommandHandlerTests
             .ReturnsAsync(project);
 
         var command = new RemoveProjectByIdCommand(projectId);
-
-        var commandHandler = new RemoveProjectByIdCommandHandler(projectRepositoryMock.Object, projectAuthorizationServiceMock.Object);
+        var notificationHandler = new BussinessNotificationsHandler();
+        var commandHandler = new RemoveProjectByIdCommandHandler(projectRepositoryMock.Object, projectAuthorizationServiceMock.Object, notificationHandler);
 
         // act
         var removed = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        removed.Should().BeNull();
+        removed.Should().Be(TaskManagerRoles.Error);
     }
 
     [Fact]
-    public async Task Handle_WhenProjectExistsAndHasPendingStatus_ReturnsFalse()
+    public async Task Handle_WhenProjectExistsAndHasPendingStatus_ReturnsError()
     {
         // arrange
         int projectId = 1001;
@@ -57,18 +61,20 @@ public class RemoveProjectByIdCommandHandlerTests
             .Returns(false);
 
         var command = new RemoveProjectByIdCommand(projectId);
+        var notificationHandler = new BussinessNotificationsHandler();
 
-        var commandHandler = new RemoveProjectByIdCommandHandler(projectRepositoryMock.Object, projectAuthorizationServiceMock.Object);
+        var commandHandler = new RemoveProjectByIdCommandHandler(projectRepositoryMock.Object, projectAuthorizationServiceMock.Object, notificationHandler);
 
         // act
         var removed = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        removed.Should().Be(false);
+        removed.Should().Be(TaskManagerRoles.Error);
+        notificationHandler.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task Handle_WhenProjectExistsAndDoesNotHavePendingStatus_ReturnsTrue()
+    public async Task Handle_WhenProjectExistsAndDoesNotHavePendingStatus_ReturnsSuccess()
     {
         // arrange
         int projectId = 1001;
@@ -89,13 +95,15 @@ public class RemoveProjectByIdCommandHandlerTests
             .Returns(true);
 
         var command = new RemoveProjectByIdCommand(projectId);
+        var notificationHandler = new BussinessNotificationsHandler();
 
-        var commandHandler = new RemoveProjectByIdCommandHandler(projectRepositoryMock.Object, projectAuthorizationServiceMock.Object);
+        var commandHandler = new RemoveProjectByIdCommandHandler(projectRepositoryMock.Object, projectAuthorizationServiceMock.Object, notificationHandler);
 
         // act
         var removed = await commandHandler.Handle(command, CancellationToken.None);
 
         // assert
-        removed.Should().Be(true);
+        removed.Should().Be(TaskManagerRoles.Success);
+        notificationHandler.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 }

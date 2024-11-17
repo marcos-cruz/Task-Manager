@@ -2,7 +2,7 @@ using MediatR;
 
 namespace Bigai.TaskManager.Application.Projects.Commands.RemoveProject;
 
-public class RemoveProjectByIdCommand : IRequest<bool?>
+public class RemoveProjectByIdCommand : IRequest<int>
 {
     public int ProjectId { get; }
 

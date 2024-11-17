@@ -1,8 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
 using Bigai.TaskManager.Application.Projects.Commands.CreateProject;
 using Bigai.TaskManager.Application.Projects.Commands.RemoveProject;
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Application.Projects.Queries.GetAllProjectsByUserId;
 using Bigai.TaskManager.Application.Projects.Queries.GetProjectById;
+using Bigai.TaskManager.Domain.Projects.Services;
 
 using MediatR;
 
@@ -14,13 +17,10 @@ namespace Bigai.TaskManager.Api.Controllers;
 [ApiController]
 [Route("api/projects/")]
 [Authorize]
-public class ProjectsController : ControllerBase
+public class ProjectsController : MainController
 {
-    private readonly IMediator _mediator;
-
-    public ProjectsController(IMediator mediator)
+    public ProjectsController(IMediator mediator, IBussinessNotificationsHandler bussinessNotificationsHandler) : base(bussinessNotificationsHandler, mediator)
     {
-        _mediator = mediator;
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ProjectDto>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<IEnumerable<ProjectDto>>> GetByUserIdAsync([FromRoute] int userId)
+    public async Task<ActionResult<IEnumerable<ProjectDto>>> GetProjectsByUserIdAsync([FromRoute][Required] int userId)
     {
         var projects = await _mediator.Send(new GetAllProjectsByUserIdQuery(userId));
 
@@ -51,11 +51,11 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ProjectDto?>> GetProjectByIdAsync([FromRoute] int projectId)
+    public async Task<ActionResult<ProjectDto?>> GetProjectByIdAsync([FromRoute][Required] int projectId)
     {
         var project = await _mediator.Send(new GetProjectByIdQuery(projectId));
 
-        return project is null ? NotFound() : Ok(project);
+        return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : Ok(project);
     }
 
     /// <summary>
@@ -68,11 +68,16 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateProjectCommand command)
+    public async Task<IActionResult> CreateAsync([FromBody][Required] CreateProjectCommand command)
     {
+        if (!ModelState.IsValid)
+        {
+            return GetResponse(ModelState);
+        }
+
         var projectId = await _mediator.Send(command);
 
-        return CreatedAtAction(nameof(GetProjectByIdAsync), new { projectId }, null);
+        return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : CreatedAtAction(nameof(GetProjectByIdAsync), new { projectId }, null);
     }
 
     /// <summary>
@@ -87,15 +92,10 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RemoveAsync([FromRoute] int projectId)
+    public async Task<IActionResult> RemoveAsync([FromRoute][Required] int projectId)
     {
-        var removed = await _mediator.Send(new RemoveProjectByIdCommand(projectId));
+        await _mediator.Send(new RemoveProjectByIdCommand(projectId));
 
-        return removed is null ? NotFound() : RemovedResponse(projectId, removed.Value);
-    }
-
-    private IActionResult RemovedResponse(int projectId, bool removed)
-    {
-        return removed ? NoContent() : BadRequest($"O projeto {projectId} possuí tarefas pendentes. Sugerimos a conclusão do projeto ou remoção das tarefas primeiro.");
+        return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : NoContent();
     }
 }

@@ -4,15 +4,17 @@ using System.Text.Json.Serialization;
 using Bigai.TaskManager.Api.Middlewares;
 using Bigai.TaskManager.Application;
 using Bigai.TaskManager.Infrastructure;
-using Bigai.TaskManager.Infrastructure.Persistence;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 using Serilog;
 
 try
 {
+    string AllowedHosts = "AllowedHosts";
+
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddAuthentication()
@@ -38,6 +40,11 @@ try
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
+
+    builder.Services.Configure<ApiBehaviorOptions>(options =>
+    {
+        options.SuppressModelStateInvalidFilter = true;
     });
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -90,10 +97,21 @@ try
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
-        await app.Services.InitializeDatabaseAsync();
+        //await app.Services.InitializeDatabaseAsync();
 
         app.UseSwagger();
         app.UseSwaggerUI();
+
+        app.UseCors(options =>
+        {
+            var originSettings = builder.Configuration[AllowedHosts];
+            if (originSettings is not null)
+            {
+                options.WithOrigins(originSettings)
+                       .AllowAnyHeader()
+                       .AllowAnyMethod();
+            }
+        });
     }
 
     app.UseHttpsRedirection();

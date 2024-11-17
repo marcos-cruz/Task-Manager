@@ -1,3 +1,5 @@
+using System.Net;
+
 using Bigai.TaskManager.Domain.Projects.Notifications;
 using Bigai.TaskManager.Domain.Projects.Services;
 
@@ -6,6 +8,8 @@ namespace Bigai.TaskManager.Infrastructure.Projects.Services;
 public sealed class BussinessNotificationsHandler : IBussinessNotificationsHandler
 {
     private List<BussinessNotification> _notifications;
+
+    public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
 
     public BussinessNotificationsHandler()
     {

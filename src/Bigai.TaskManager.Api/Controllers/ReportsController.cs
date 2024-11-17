@@ -4,6 +4,7 @@ using Bigai.TaskManager.Application.Projects.Queries.GetReportByProjectId;
 using Bigai.TaskManager.Application.Projects.Queries.GetReportByRange;
 using Bigai.TaskManager.Domain.Projects.Constants;
 using Bigai.TaskManager.Domain.Projects.Contracts;
+using Bigai.TaskManager.Domain.Projects.Services;
 
 using MediatR;
 
@@ -15,13 +16,10 @@ namespace Bigai.TaskManager.Api.Controllers
     [ApiController]
     [Route("api/projects/performance/")]
     [Authorize(Roles = TaskManagerRoles.Manager)]
-    public class ReportsController : ControllerBase
+    public class ReportsController : MainController
     {
-        private readonly IMediator _mediator;
-
-        public ReportsController(IMediator mediator)
+        public ReportsController(IMediator mediator, IBussinessNotificationsHandler bussinessNotificationsHandler) : base(bussinessNotificationsHandler, mediator)
         {
-            _mediator = mediator;
         }
 
         /// <summary>
@@ -35,8 +33,14 @@ namespace Bigai.TaskManager.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<IReportPeriod>))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<IReportPeriod>>> GetReportByRangeAsync([FromQuery][Required][StringLength(10, ErrorMessage = "Informe uma data no formato dd/mm/aaaa", MinimumLength = 10)] string initialDate, [Required][StringLength(10, ErrorMessage = "Informe uma data no formato dd/mm/aaaa", MinimumLength = 10)] string finalDate)
+        public async Task<ActionResult<IEnumerable<IReportPeriod>>> GetReportByRangeAsync([FromQuery][Required][StringLength(10, ErrorMessage = "Informe uma data no formato dd/mm/aaaa", MinimumLength = 10)] string initialDate,
+                                                                                          [Required][StringLength(10, ErrorMessage = "Informe uma data no formato dd/mm/aaaa", MinimumLength = 10)] string finalDate)
         {
+            if (!ModelState.IsValid)
+            {
+                return GetResponse(ModelState);
+            }
+
             DateTime initialPeriod;
             DateTime finalPeriod;
 
@@ -48,13 +52,15 @@ namespace Bigai.TaskManager.Api.Controllers
             catch (Exception)
             {
                 ModelState.AddModelError("Período", "Informe as datas sempre no formato dd/mm/aaaa");
-                return BadRequest();
+
+                return GetResponse(ModelState);
             }
 
             GetReportByRangeQuery query = new GetReportByRangeQuery(initialPeriod, finalPeriod);
+
             var response = await _mediator.Send(query);
 
-            return Ok(response);
+            return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : Ok(response);
         }
 
         /// <summary>
@@ -69,6 +75,11 @@ namespace Bigai.TaskManager.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<IEnumerable<IReportPeriod>>> GetReportByPeriodAsync([FromQuery][Required][StringLength(10, ErrorMessage = "Informe uma data no formato dd/mm/aaaa", MinimumLength = 10)] string initialDate)
         {
+            if (!ModelState.IsValid)
+            {
+                return GetResponse(ModelState);
+            }
+
             DateTime initialPeriod;
 
             try
@@ -78,13 +89,15 @@ namespace Bigai.TaskManager.Api.Controllers
             catch (Exception)
             {
                 ModelState.AddModelError(nameof(initialDate), "Informe a data sempre no formato dd/mm/aaaa");
-                return BadRequest();
+
+                return GetResponse(ModelState);
             }
 
             GetReportByRangeQuery query = new GetReportByRangeQuery(initialPeriod, initialPeriod.AddDays(30));
+
             var response = await _mediator.Send(query);
 
-            return Ok(response);
+            return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : Ok(response);
         }
 
         /// <summary>
@@ -112,13 +125,15 @@ namespace Bigai.TaskManager.Api.Controllers
             catch (Exception)
             {
                 ModelState.AddModelError("Período", "Informe as datas sempre no formato dd/mm/aaaa");
-                return BadRequest();
+
+                return GetResponse(ModelState);
             }
 
             GetReportByProjectIdQuery query = new GetReportByProjectIdQuery(projectId, initialPeriod, finalPeriod);
+
             var response = await _mediator.Send(query);
 
-            return Ok(response);
+            return _bussinessNotificationsHandler.HasNotification() ? GetResponse() : Ok(response);
         }
     }
 }

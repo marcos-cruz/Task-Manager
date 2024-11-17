@@ -1,8 +1,12 @@
+using System.Net;
+
 using Bigai.TaskManager.Application.Projects.Dtos;
 using Bigai.TaskManager.Application.Projects.Queries.GetAllProjectsByUserId;
 using Bigai.TaskManager.Domain.Projects.Models;
 using Bigai.TaskManager.Domain.Projects.Repositories;
+using Bigai.TaskManager.Domain.Projects.Services;
 using Bigai.TaskManager.Domain.Tests.Helpers;
+using Bigai.TaskManager.Infrastructure.Projects.Services;
 
 using FluentAssertions;
 
@@ -14,11 +18,13 @@ public class GetAllProjectsByUserIdQueryHandlerTests
 {
     private readonly Mock<IProjectRepository> _projectsRepositoryMock;
     private readonly GetAllProjectsByUserIdQueryHandler _queryHandler;
+    private readonly IBussinessNotificationsHandler _notificationsHandler;
 
     public GetAllProjectsByUserIdQueryHandlerTests()
     {
         _projectsRepositoryMock = new Mock<IProjectRepository>();
-        _queryHandler = new GetAllProjectsByUserIdQueryHandler(_projectsRepositoryMock.Object);
+        _notificationsHandler = new BussinessNotificationsHandler();
+        _queryHandler = new GetAllProjectsByUserIdQueryHandler(_projectsRepositoryMock.Object, _notificationsHandler);
     }
 
     [Fact()]
@@ -39,6 +45,7 @@ public class GetAllProjectsByUserIdQueryHandlerTests
 
         // assert
         result.Should().NotBeNullOrEmpty();
+        _notificationsHandler.StatusCode.Should().Be(HttpStatusCode.OK);
         Assert.IsAssignableFrom<IEnumerable<ProjectDto>>(result);
     }
 }
