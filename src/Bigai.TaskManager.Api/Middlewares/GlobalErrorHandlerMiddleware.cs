@@ -24,7 +24,8 @@ public class GlobalErrorHandlerMiddleware : IMiddleware
             var problemDetails = new ProblemDetails
             {
                 Status = StatusCodes.Status500InternalServerError,
-                Title = "Server error"
+                Title = "Server error",
+                Detail = "Identificamos um erro, já estamos atuando para solucioná-lo."
             };
 
             context.Response.StatusCode = problemDetails.Status.Value;
