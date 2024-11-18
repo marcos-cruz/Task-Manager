@@ -7,7 +7,7 @@ ENV ASPNETCORE_URLS=http://+:5000
 
 USER app
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Development
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Bigai.TaskManager.Api/Bigai.TaskManager.Api.csproj", "src/Bigai.TaskManager.Api/"]
 RUN dotnet restore "src/Bigai.TaskManager.Api/Bigai.TaskManager.Api.csproj"
@@ -16,7 +16,7 @@ WORKDIR "/src/src/Bigai.TaskManager.Api"
 RUN dotnet build "Bigai.TaskManager.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-ARG configuration=Development
+ARG configuration=Release
 RUN dotnet publish "Bigai.TaskManager.Api.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
 
 FROM base AS final

@@ -25,7 +25,6 @@ services:
       context: .
       dockerfile: src\Bigai.TaskManager.Api\Dockerfile
     environment:
-      # - ASPNETCORE_URLS=http://+:5000
       - ASPNETCORE_ENVIRONMENT="Development"
       - ASPNETCORE_HTTP_PORTS="5000"
       - ASPNETCORE_HTTPS_PORTS="5001"
