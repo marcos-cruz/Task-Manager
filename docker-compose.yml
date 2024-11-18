@@ -1,0 +1,60 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
+
+version: '3.4'
+
+#
+# Para que os containers possam comunicar-se entre si.
+#
+networks:
+  dev:
+    driver: bridge
+
+services:
+  #
+  # Container que roda a api.
+  #
+  task-manager-api:
+    image: docker.io/library/task-manager-api-development:1.0
+    depends_on:
+      - task-manager-db
+    container_name: task-manager-api
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    build:
+      context: .
+      dockerfile: src\Bigai.TaskManager.Api\Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT="Development"
+      - ASPNETCORE_HTTP_PORTS="5000"
+      - ASPNETCORE_HTTPS_PORTS="5001"
+      - DbServer="task-manager-db"
+      - DbPort="14330"
+      - DbUser="sa"
+      - DbPassword="Pass@word123"
+      - DbName="TaskManagerDb"
+    networks:
+      - dev
+
+  #
+  # Container que roda a instância do banco de dados SQL Server.
+  #
+  task-manager-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: task-manager-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Pass@word123
+      - MSSQL_PID=Developer
+      - MSSQL_BACKUP_DIR=/var/opt/mssql/backups
+      - MSSQL_LCID=1033
+      - TZ=Etc/UTC
+    ports:
+      - 14330:1433
+    restart: always
+    volumes:
+      - ./data/mssql/backups:/var/opt/mssql/backups
+      - ./data/mssql/data:/var/opt/mssql/data
+      - ./data/mssql/log:/var/opt/mssql/log
+    networks:
+      - dev
