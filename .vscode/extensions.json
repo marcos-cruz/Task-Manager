@@ -4,6 +4,8 @@
         "humao.rest-client",
         "yzhang.markdown-all-in-one",
         "ms-dotnettools.csdevkit",
-        "sonarsource.sonarlint-vscode"
+        "sonarsource.sonarlint-vscode",
+        "pkief.material-icon-theme",
+        "kreativ-software.csharpextensions"
     ]
 }

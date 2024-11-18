@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using Bigai.TaskManager.Application.Users;
+
+using FluentValidation;
 using FluentValidation.AspNetCore;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +20,9 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(assembly)
                 .AddFluentValidationAutoValidation();
+
+        services.AddScoped<IUserContext, UserContext>();
+        services.AddHttpContextAccessor();
 
         return services;
     }

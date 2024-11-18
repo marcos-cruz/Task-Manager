@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,13 +8,20 @@
     <Title>RestFul task management API that provides support for the user to organize and monitor their daily tasks, developed by Marcos Cruz.</Title>
     <Authors>Marcos Cruz</Authors>
     <Company>Bigai Software, Santo André, SP, Brazil.</Company>
-    <Description>Serviço de consumo de protocolos da fila RabbitMQ.</Description>
+    <Description>Task management system.</Description>
     <RepositoryUrl>https://github.com/marcos-cruz/Task-Manager</RepositoryUrl>
     <Copyright>Copyright ©2024 Marcos Cruz, All rights reserved.</Copyright>
     <NoWarn>$(NoWarn);1591</NoWarn>    
+    <UserSecretsId>45de0ac2-928e-43d2-b26f-045837e69fa4</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 

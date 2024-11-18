@@ -1,0 +1,35 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
+
+version: '3.4'
+
+#
+# Para que os containers possam comunicar-se entre si.
+#
+networks:
+  dev:
+    driver: bridge
+
+services:
+  #
+  # Container que roda a instância do banco de dados SQL Server.
+  #
+  task-manager-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: task-manager-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Pass@word123
+      - MSSQL_PID=Developer
+      - MSSQL_BACKUP_DIR=/var/opt/mssql/backups
+      - MSSQL_LCID=1033
+      - TZ=Etc/UTC
+    ports:
+      - 14330:1433
+    restart: always
+    volumes:
+      - sqlvolume:/var/opt/mssql
+    networks:
+      - dev
+
+volumes:
+  sqlvolume:
